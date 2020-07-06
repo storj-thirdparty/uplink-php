@@ -73,16 +73,6 @@ class Util
     }
 
     /**
-     * Create a char*
-     * Memory is managed by PHP reference counting (owned=true)
-     */
-    public static function createBuffer(int $length): CData
-    {
-        $type = FFI::arrayType(FFI::type('char'), [$length]);
-        return FFI::new($type);
-    }
-
-    /**
      * @param mixed $var
      * @throws UplinkException
      */

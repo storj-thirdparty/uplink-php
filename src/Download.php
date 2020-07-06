@@ -64,16 +64,17 @@ class Download
      * Low-level function to read a chunk of a download.
      * Probably you'll want to use one of the other methods
      *
-     * @param CData|null $buffer !!!!! IF < $length YOU WILL SEGFAULT !!!!!
+     * @param int $length this is a maximum, there may be more data even if it gave back less than this
+     * @param string|null $buffer !!!!! IF < $length YOU WILL SEGFAULT !!!!!
      *
      * @return string empty if the end has been reached
      *
      * @throws UplinkException
      */
-    public function read(int $length = self::CHUNKSIZE, ?CData $buffer = null): string
+    public function read(int $length = self::CHUNKSIZE, ?string& $buffer = null): string
     {
         if ($buffer === null) {
-            $buffer = Util::createBuffer($length);
+            $buffer = str_repeat("\0", $length);
         }
 
         $readResult = $this->ffi->download_read($this->cDownload, $buffer, $length);
@@ -86,7 +87,24 @@ class Download
 
         Util::throwIfErrorResult($readResult);
 
-        return FFI::string($buffer, $readResult->bytes_read);
+        return substr($buffer, 0, $readResult->bytes_read);
+    }
+
+    /**
+     * Read the entire download into a string
+     * You may run out of memory
+     *
+     * @throws UplinkException
+     */
+    public function readAll(int $chunkSize = self::CHUNKSIZE): string
+    {
+        $result = '';
+
+        foreach ($this->iterate($chunkSize) as $chunk) {
+            $result .= $chunk;
+        }
+
+        return $result;
     }
 
     /**
@@ -135,7 +153,7 @@ class Download
      */
     public function iterate(int $chunkSize = self::CHUNKSIZE): Generator
     {
-        $buffer = Util::createBuffer($chunkSize);
+        $buffer = $buffer = str_repeat("\0", $chunkSize);
 
         while (true) {
             $chunk = $this->read($chunkSize, $buffer);

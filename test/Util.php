@@ -4,11 +4,14 @@ namespace Storj\Uplink\Test;
 
 use Storj\Uplink\Access;
 use Storj\Uplink\ListObjectsOptions;
+use Storj\Uplink\Project;
 use Storj\Uplink\Uplink;
 
 class Util
 {
     private static $access;
+
+    private static $project;
 
     public static function access(): Access
     {
@@ -23,10 +26,33 @@ class Util
         return self::$access;
     }
 
+    public static function emptyProject(): Project
+    {
+        $project = self::project();
+        self::wipeProject($project);
+        return $project;
+    }
+
+    public static function project(): Project
+    {
+        if (!self::$project) {
+            self::$project = self::access()->openProject();
+        }
+
+        return self::$project;
+    }
+
     public static function emptyAccess(): Access
     {
-        $project = self::access()->openProject();
+        $project = self::project();
 
+        self::wipeProject($project);
+
+        return self::$access;
+    }
+
+    private static function wipeProject(Project $project): void
+    {
         foreach ($project->listBuckets() as $bucket) {
             $bucketName = $bucket->getName();
 
@@ -36,7 +62,5 @@ class Util
 
             $project->deleteBucket($bucket->getName());
         }
-
-        return self::$access;
     }
 }

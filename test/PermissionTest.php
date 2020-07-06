@@ -15,7 +15,7 @@ class PermissionTest extends TestCase
 
         $access = Util::emptyAccess()->share(
             new Permission(false, false, false, false),
-            [new SharePrefix('bucket1', '')]
+            [new SharePrefix('phpunit', '')]
         );
     }
 
@@ -23,12 +23,12 @@ class PermissionTest extends TestCase
     {
         $mainAccess = Util::emptyAccess();
         $mainProject = $mainAccess->openProject();
-        $mainProject->createBucket('bucket1');
-        $mainProject->createBucket('bucket2');
+        $mainProject->createBucket('phpunit1');
+        $mainProject->createBucket('phpunit2');
 
         $access = $mainAccess->share(
             new Permission(true, true, true, true),
-            [new SharePrefix('bucket1', '')]
+            [new SharePrefix('phpunit1', '')]
         );
 
         $project = $access->openProject();
@@ -36,7 +36,7 @@ class PermissionTest extends TestCase
 
         $this->expectException(UplinkException::class);
 
-        $upload = $project->uploadObject('bucket2', 'myObj');
+        $upload = $project->uploadObject('phpunit2', 'myObj');
         $upload->write('asdf');
         $upload->commit();
     }

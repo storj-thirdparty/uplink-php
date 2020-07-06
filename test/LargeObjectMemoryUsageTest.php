@@ -14,15 +14,15 @@ class LargeObjectMemoryUsageTest extends TestCase
         $outputFile = tmpfile();
 
         $project = Util::emptyAccess()->openProject();
-        $project->createBucket('bucket1');
+        $project->createBucket('phpunit');
 
-        $upload = $project->uploadObject('bucket1', 'LargeObjectMemoryUsageTest');
+        $upload = $project->uploadObject('phpunit', 'LargeObjectMemoryUsageTest');
         $upload->writeFromResource($inputFile);
         $upload->commit();
 
         self::assertLessThan(20_000_000, memory_get_peak_usage());
 
-        $download = $project->downloadObject('bucket1', 'LargeObjectMemoryUsageTest');
+        $download = $project->downloadObject('phpunit', 'LargeObjectMemoryUsageTest');
         $download->readIntoResource($outputFile);
 
         self::assertLessThan(20_000_000, memory_get_peak_usage());
