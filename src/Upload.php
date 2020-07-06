@@ -117,7 +117,7 @@ class Upload
 
         Util::throwIfErrorResult($objectResult);
 
-        return ObjectInfo::fromCStruct($objectResult->object);
+        return ObjectInfo::fromCStruct($objectResult->object, true, true);
     }
 
     /**

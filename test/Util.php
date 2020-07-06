@@ -56,7 +56,7 @@ class Util
         foreach ($project->listBuckets() as $bucket) {
             $bucketName = $bucket->getName();
 
-            foreach ($project->listObjects($bucketName, new ListObjectsOptions('', null, false, false, false)) as $objectInfo) {
+            foreach ($project->listObjects($bucketName, new ListObjectsOptions('', '', false, false, false)) as $objectInfo) {
                 $project->deleteObject($bucketName, $objectInfo->getKey());
             }
 

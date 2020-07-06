@@ -12,16 +12,16 @@ class ObjectInfo
 
     private bool $isPrefix;
 
-    private SystemMetadata $systemMetadata;
+    private ?SystemMetadata $systemMetadata;
 
     /**
      * hash map
      *
      * @var string[]
      */
-    private array $customMetaData;
+    private ?array $customMetaData;
 
-    public function __construct(string $key, bool $isPrefix, SystemMetadata $system, array $customMetaData)
+    public function __construct(string $key, bool $isPrefix, ?SystemMetadata $system, ?array $customMetaData)
     {
         $this->key = $key;
         $this->isPrefix = $isPrefix;
@@ -32,11 +32,21 @@ class ObjectInfo
     /**
      * @internal
      */
-    public static function fromCStruct(CData $cObjectInfo): self
+    public static function fromCStruct(
+        CData $cObjectInfo,
+        bool $includeSystemMetadata,
+        bool $includeCustomMetaData
+    ): self
     {
-        $systemMetaData = SystemMetadata::fromCStruct($cObjectInfo->system);
+        $systemMetaData = null;
+        if ($includeSystemMetadata) {
+            $systemMetaData = SystemMetadata::fromCStruct($cObjectInfo->system);
+        }
 
-        $customMetaData = ObjectInfo::createCustomMetaDataFromCStruct($cObjectInfo->custom);
+        $customMetaData = null;
+        if ($includeCustomMetaData) {
+            $customMetaData = self::createCustomMetaDataFromCStruct($cObjectInfo->custom);
+        }
 
         return new ObjectInfo(
             FFI::string($cObjectInfo->key),
@@ -50,7 +60,9 @@ class ObjectInfo
      * @param CData $cCustomMetaData C struct of type CustomMetaData
      * @return string[] hash map
      */
-    private static function createCustomMetaDataFromCStruct(CData $cCustomMetaData): array
+    private static function createCustomMetaDataFromCStruct(
+        CData $cCustomMetaData
+    ): array
     {
         $customMetaData = [];
         foreach (Util::it($cCustomMetaData->count) as $i) {
@@ -74,15 +86,18 @@ class ObjectInfo
         return $this->isPrefix;
     }
 
-    public function getSystemMetadata(): SystemMetadata
+    /**
+     * @return SystemMetadata|null
+     */
+    public function getSystemMetadata(): ?SystemMetadata
     {
         return $this->systemMetadata;
     }
 
     /**
-     * @return string[]
+     * @return string[]|null
      */
-    public function getCustomMetaData(): array
+    public function getCustomMetaData(): ?array
     {
         return $this->customMetaData;
     }

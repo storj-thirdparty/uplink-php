@@ -9,6 +9,7 @@ use Generator;
 use Storj\Uplink\Exception\UplinkException;
 use Storj\Uplink\Internal\Scope;
 use Storj\Uplink\Internal\Util;
+use Storj\Uplink\Test\ListObjectsTest;
 
 class Project
 {
@@ -149,16 +150,17 @@ class Project
      */
     public function downloadObject(string $bucketName, string $objectKey, ?DownloadOptions $downloadOptions = null): Download
     {
-        $cDownloadOptions = null;
+        $pDownloadOptions = null;
         if ($downloadOptions) {
             $cDownloadOptions = $downloadOptions->toCStruct($this->ffi);
+            $pDownloadOptions = FFI::addr($cDownloadOptions);
         }
 
         $downloadResult = $this->ffi->download_object(
             $this->cProject,
             $bucketName,
             $objectKey,
-            $cDownloadOptions
+            $pDownloadOptions
         );
         $scope = Scope::exit(fn() => $this->ffi->free_download_result($downloadResult));
 
@@ -211,14 +213,16 @@ class Project
      * @param string $bucketName
      * @return ObjectInfo[]|Generator<ObjectInfo>
      */
-    public function listObjects(string $bucketName, ?ListObjectsOptions $listObjectsOptions): Generator
+    public function listObjects(string $bucketName, ?ListObjectsOptions $listObjectsOptions = null): Generator
     {
         $scope = new Scope();
         $pListObjectOptions = null;
-        if ($listObjectsOptions) {
-            $cListObjectOptions = $listObjectsOptions->toCStruct($this->ffi, $scope);
-            $pListObjectOptions = FFI::addr($cListObjectOptions);
-        }
+
+        // ListObjectsOptions is technically optional to the C interface
+        // but we need to know the options in order to parse the response
+        $listObjectsOptions = $listObjectsOptions ?? new ListObjectsOptions();
+        $cListObjectOptions = $listObjectsOptions->toCStruct($this->ffi, $scope);
+        $pListObjectOptions = FFI::addr($cListObjectOptions);
 
         $pObjectIterator = $this->ffi->list_objects($this->cProject, $bucketName, $pListObjectOptions);
         $scope->onExit(fn() => $this->ffi->free_object_iterator($pObjectIterator));
@@ -228,7 +232,11 @@ class Project
             $innerScope = Scope::exit(fn() => $this->ffi->free_object($pObject));
 
             // TODO: Why do we do [0] here but not when dereferencing ObjectResult::object?
-            yield ObjectInfo::fromCStruct($pObject[0]);
+            yield ObjectInfo::fromCStruct(
+                $pObject[0],
+                $listObjectsOptions->includeSystemMetadata(),
+                $listObjectsOptions->includeCustomMetadata()
+            );
         }
 
         $pError = $this->ffi->object_iterator_err($pObjectIterator);

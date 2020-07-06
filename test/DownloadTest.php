@@ -3,6 +3,7 @@
 namespace Storj\Uplink\Test;
 
 use PHPUnit\Framework\TestCase;
+use Storj\Uplink\DownloadOptions;
 
 class DownloadTest extends TestCase
 {
@@ -10,7 +11,7 @@ class DownloadTest extends TestCase
 
     public static function setUpBeforeClass(): void
     {
-        self::$content = bin2hex(random_bytes(32));
+        self::$content = bin2hex(random_bytes(32)); // 64 bytes
 
         $project = Util::emptyAccess()->openProject();
         $project->createBucket('phpunit');
@@ -21,7 +22,7 @@ class DownloadTest extends TestCase
 
     public function testSmallChunks()
     {
-        $download = Util::access()->openProject()->downloadObject('phpunit', 'DownloadTest');
+        $download = Util::project()->downloadObject('phpunit', 'DownloadTest');
         $chunk1 = $download->read(2);
         $chunk2 = $download->read(2);
 
@@ -34,5 +35,15 @@ class DownloadTest extends TestCase
         $rest = $download->readAll();
 
         self::assertEquals(self::$content, $chunk1 . $chunk2 . $rest);
+    }
+
+    public function testOffsetAndLength()
+    {
+        $download = Util::project()->downloadObject('phpunit', 'DownloadTest', new DownloadOptions(10, 4));
+
+        self::assertEquals(
+            substr(self::$content, 10, 4),
+            $download->readAll()
+        );
     }
 }
