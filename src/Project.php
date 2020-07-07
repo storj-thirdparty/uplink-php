@@ -118,15 +118,16 @@ class Project
      */
     public function listBuckets(?string $cursor = null): Generator
     {
+        $scope = new Scope();
         $listBucketOptions = $this->ffi->new('ListBucketsOptions');
         if ($cursor) {
-            [$pChar, $cursorScope] = Util::createCString($cursor);
+            $pChar = Util::createCString($cursor, $scope);
 
             $listBucketOptions->cursor = $pChar;
         }
 
         $pBucketIterator = $this->ffi->list_buckets($this->cProject, FFI::addr($listBucketOptions));
-        $scope = Scope::exit(fn() => $this->ffi->free_bucket_iterator($pBucketIterator));
+        $scope->onExit(fn() => $this->ffi->free_bucket_iterator($pBucketIterator));
 
         while ($this->ffi->bucket_iterator_next($pBucketIterator)) {
             $pBucket = $this->ffi->bucket_iterator_item($pBucketIterator);

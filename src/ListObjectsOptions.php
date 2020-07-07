@@ -57,14 +57,8 @@ class ListObjectsOptions
     {
         $cListObjectsOptions = $ffi->new('ListObjectsOptions');
 
-        [$cPrefix, $prefixScope] = Util::createCString($this->prefix);
-        $prefixScope->transfer($scope);
-
-        [$cCursor, $cursorScope] = Util::createCString($this->cursor);
-        $cursorScope->transfer($scope);
-
-        $cListObjectsOptions->prefix = $cPrefix;
-        $cListObjectsOptions->cursor = $cCursor;
+        $cListObjectsOptions->prefix = Util::createCString($this->prefix, $scope);
+        $cListObjectsOptions->cursor = Util::createCString($this->cursor, $scope);
         $cListObjectsOptions->recursive = $this->recursive;
         $cListObjectsOptions->system = $this->system;
         $cListObjectsOptions->custom = $this->custom;

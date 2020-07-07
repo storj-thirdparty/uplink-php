@@ -43,27 +43,23 @@ class SharePrefix
      * @param FFI $ffi
      * @param SharePrefix[] $sharePrefixes
      */
-    public static function toCStructArray(FFI $ffi, array $sharePrefixes): array
+    public static function toCStructArray(FFI $ffi, array $sharePrefixes, Scope $scope): FFI\CData
     {
         $count = count($sharePrefixes);
 
         $cSharePrefixesType = FFI::arrayType($ffi->type('SharePrefix'), [$count]);
         $cSharePrefixes = $ffi->new($cSharePrefixesType);
 
-        $scope = new Scope();
-
         // TODO: split body in separate function
         foreach (Util::it($count) as $i) {
             $cSharePrefix = $cSharePrefixes[$i];
-            [$pCharBucket, $bucketScope] = Util::createCString($sharePrefixes[$i]->bucket);
-            [$pCharPrefix, $prefixScope] = Util::createCString($sharePrefixes[$i]->prefix);
-
-            $scope = Scope::merge($scope, $bucketScope, $prefixScope);
+            $pCharBucket = Util::createCString($sharePrefixes[$i]->bucket, $scope);
+            $pCharPrefix = Util::createCString($sharePrefixes[$i]->prefix, $scope);
 
             $cSharePrefix->bucket = $pCharBucket;
             $cSharePrefix->prefix = $pCharPrefix;
         }
 
-        return [$cSharePrefixes, $scope];
+        return $cSharePrefixes;
     }
 }

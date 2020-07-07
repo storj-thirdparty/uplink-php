@@ -137,15 +137,13 @@ class Upload
         foreach ($customMetadata as $key => $value) {
             $cEntry = $cEntries[$i];
 
-            [$cKey, $keyScope] = Util::createCString($key);
-            [$cValue, $valueScope] = Util::createCString($value);
+            $cKey = Util::createCString($key, $scope);
+            $cValue = Util::createCString($value, $scope);
 
             $cEntry->key = $cKey;
             $cEntry->key_length = strlen($key);
             $cEntry->value = $cValue;
             $cEntry->value_length = strlen($value);
-
-            $scope = Scope::merge($scope, $keyScope, $valueScope);
 
             $i++;
         }

@@ -31,17 +31,16 @@ class Config
         $this->tempDirectory = $tempDirectory ?? sys_get_temp_dir();
     }
 
-    public function toCStruct(FFI $ffi): array
+    public function toCStruct(FFI $ffi, Scope $scope): FFI\CData
     {
-        [$cUserAgent, $scope1] = Util::createCString($this->userAgent);
-        [$cTempDirectory, $scope2] = Util::createCString($this->tempDirectory);
-        $scope = Scope::merge($scope1, $scope2);
+        $cUserAgent = Util::createCString($this->userAgent, $scope);
+        $cTempDirectory = Util::createCString($this->tempDirectory, $scope);
 
         $cConfig = $ffi->new('Config');
         $cConfig->user_agent = $cUserAgent;
         $cConfig->dial_timeout_milliseconds = $this->dialTimeoutMilliseconds;
         $cConfig->temp_directory = $cTempDirectory;
 
-        return [$cConfig, $scope];
+        return $cConfig;
     }
 }

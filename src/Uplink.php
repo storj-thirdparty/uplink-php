@@ -84,8 +84,9 @@ class Uplink
         ?Config $config = null
     ): Access
     {
+        $scope = new Scope();
         if ($config) {
-            [$cConfig, $configScope] = $config->toCStruct($this->ffi);
+            $cConfig = $config->toCStruct($this->ffi, $scope);
             $accessResult = $this->ffi->config_request_access_with_passphrase(
                 $cConfig,
                 $satellite_address,
@@ -96,7 +97,7 @@ class Uplink
         } else {
             $accessResult = $this->ffi->request_access_with_passphrase($satellite_address, $api_key, $passphrase);
         }
-        $scope = Scope::exit(fn() => $this->ffi->free_access_result($accessResult));
+        $scope->onExit(fn() => $this->ffi->free_access_result($accessResult));
 
         Util::throwIfErrorResult($accessResult);
 

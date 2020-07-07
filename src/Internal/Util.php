@@ -56,20 +56,20 @@ class Util
     /**
      * Create a null-terminated char*
      * The memory must be unmanaged (owned=false) so it can be assigned to C struct members
-     * Therefore also make a scope to ensure it is freed
+     * Therefore it requires a scope to ensure it is freed
      */
-    public static function createCString(string $content): array
+    public static function createCString(string $content, Scope $scope): CData
     {
         $content .= "\0";
         $length = strlen($content);
 
         $type = FFI::arrayType(FFI::type('char'), [$length]);
         $pChar = FFI::new($type, false);
-        $scope = Scope::exit(fn() => FFI::free($pChar));
+        $scope->onExit(fn() => FFI::free($pChar));
 
         FFI::memcpy($pChar, $content, $length);
 
-        return [$pChar, $scope];
+        return $pChar;
     }
 
     /**

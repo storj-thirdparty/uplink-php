@@ -4,6 +4,9 @@ namespace Storj\Uplink\Test;
 
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @group memory-usage
+ */
 class LargeObjectMemoryUsageTest extends TestCase
 {
     public function testUploadAndDownloadLargeFile()
