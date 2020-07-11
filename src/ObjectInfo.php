@@ -97,7 +97,7 @@ class ObjectInfo
     /**
      * @return string[]|null
      */
-    public function getCustomMetaData(): ?array
+    public function getCustomMetadata(): ?array
     {
         return $this->customMetaData;
     }

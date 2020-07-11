@@ -30,7 +30,7 @@ if ($filename) {
         return;
     }
 
-    $type = $download->info()->getCustomMetaData()['Content-Type'];
+    $type = $download->info()->getCustomMetadata()['Content-Type'];
     header("Content-Type: $type");
     $download->readIntoResource(fopen('php://output', 'w'));
     return;

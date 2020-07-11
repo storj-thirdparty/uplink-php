@@ -3,6 +3,8 @@ Uplink PHP client
 
 Client for decentralized object storage on [Tardigrade.io](https://tardigrade.io/)
 
+[▶ 40 second video](https://www.youtube.com/watch?v=QOjM5ERd8yo&feature=youtu.be)
+
 Requirements
 ----------
 

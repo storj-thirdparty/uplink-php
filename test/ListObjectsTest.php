@@ -24,7 +24,7 @@ class ListObjectsTest extends TestCase
         $objectInfo = $objects[0];
         self::assertEquals('ListObjectsTest', $objectInfo->getKey());
         self::assertNull($objectInfo->getSystemMetadata());
-        self::assertNull($objectInfo->getCustomMetaData());
+        self::assertNull($objectInfo->getCustomMetadata());
     }
 
     public function testListWithMetadata(): void
