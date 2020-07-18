@@ -13,19 +13,20 @@ use Storj\Uplink\Exception\IOException;
 use Storj\Uplink\Exception\UplinkException;
 use Storj\Uplink\Internal\Scope;
 use Storj\Uplink\Internal\Util;
-use Storj\Uplink\Psr\ReadStream;
+use Storj\Uplink\CursoredDownload;
+use Storj\Uplink\PsrStream\ReadStream;
 
 /**
  * Handle to a remote object
  *
- * TODO: can the download be read only once? Should we protect against reading it twice?
+ * TODO: download can only be read once. Should we protect against reading it twice?
  */
 class Download
 {
     /**
      * We seem to receive 7408 bytes per read
      */
-    private const CHUNKSIZE = 8000;
+    protected const CHUNKSIZE = 8000;
 
     /**
      * With libuplink.so and header files loaded
@@ -165,5 +166,15 @@ class Download
 
             yield $chunk;
         }
+    }
+
+    public function cursored(): CursoredDownload
+    {
+        return new CursoredDownload($this->ffi, $this->cDownload, $this->scope);
+    }
+
+    public function toPsrStream(): ReadStream
+    {
+        return new ReadStream($this->cursored());
     }
 }

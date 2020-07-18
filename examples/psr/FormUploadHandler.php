@@ -13,7 +13,7 @@ use Storj\Uplink\Access;
  * Minimal example to upload a file via HTML form using PHP-FIG standards.
  * Verified working in Mezzio.
  */
-class PsrFormUploadHandler implements RequestHandlerInterface
+class FormUploadHandler implements RequestHandlerInterface
 {
     private Access $access;
 
@@ -60,12 +60,7 @@ class PsrFormUploadHandler implements RequestHandlerInterface
         foreach ($request->getUploadedFiles() as $uploadedFile) {
             $upload = $project->uploadObject('psr', $uploadedFile->getClientFilename());
 
-            $stream = $uploadedFile->getStream();
-            $stream->rewind();
-            while (!$stream->eof()) {
-                $upload->write($stream->read(8000));
-            }
-            $stream->rewind();
+            $upload->writeFromPsrStream($uploadedFile->getStream());
 
             if ($uploadedFile->getClientMediaType()) {
                 $upload->setCustomMetadata([

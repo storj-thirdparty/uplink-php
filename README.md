@@ -61,4 +61,5 @@ Examples:
 
 - [raw/upload.php](examples/raw/upload.php) Upload files via a HTML form
 - [raw/download.php](examples/raw/download.php) Download files via the browser
-- [PsrFormUploadHandler.php](examples/PsrFormUploadHandler.php) Upload files via a HTML form in a PSR-7 framework
+- [psr/FormUploadHandler.php](examples/psr/FormUploadHandler.php) Upload files via a HTML form in a PSR-7 framework
+- [psr/DownloadHandler.php](examples/psr/FormUploadHandler.php) Stream a PSR-7 HTTP response

@@ -4,11 +4,15 @@ namespace Storj\Uplink;
 
 use FFI;
 use FFI\CData;
+use Psr\Http\Message\StreamInterface;
 use Storj\Uplink\Exception\IOException;
 use Storj\Uplink\Exception\UplinkException;
 use Storj\Uplink\Internal\Scope;
 use Storj\Uplink\Internal\Util;
 
+/**
+ * TODO: should we make sure that the upload is always committed or aborted upon destruction?
+ */
 class Upload
 {
     private const CHUNKSIZE = 8000;
@@ -85,6 +89,19 @@ class Upload
         }
     }
 
+    public function writeFromPsrStream(StreamInterface $stream): void
+    {
+        $stream->rewind();
+
+        while (!$stream->eof()) {
+            $this->write($stream->read(self::CHUNKSIZE));
+        }
+
+        if ($stream->isSeekable()) {
+            $stream->rewind();
+        }
+    }
+
     /**
      * @throws UplinkException
      */
@@ -156,5 +173,10 @@ class Upload
         $scope->onExit(fn() => $this->ffi->free_error($pError));
 
         Util::throwIfError($pError);
+    }
+
+    public function cursored()
+    {
+        return new CursoredUpload($this->ffi, $this->cUpload, $this->scope);
     }
 }
