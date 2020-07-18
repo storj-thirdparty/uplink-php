@@ -13,6 +13,10 @@ class ListObjectsTest extends TestCase
     {
         $project = Util::emptyProject();
         $project->createBucket('phpunit');
+
+        $objects = iterator_to_array($project->listObjects('phpunit'));
+        self::assertCount(0, $objects);
+
         $upload = $project->uploadObject('phpunit', 'ListObjectsTest');
         $upload->write(random_bytes(32));
         $upload->commit();

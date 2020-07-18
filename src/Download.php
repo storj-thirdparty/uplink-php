@@ -8,10 +8,12 @@ use FFI;
 use FFI\CData;
 use Generator;
 use IteratorAggregate;
+use Psr\Http\Message\StreamInterface;
 use Storj\Uplink\Exception\IOException;
 use Storj\Uplink\Exception\UplinkException;
 use Storj\Uplink\Internal\Scope;
 use Storj\Uplink\Internal\Util;
+use Storj\Uplink\Psr\ReadStream;
 
 /**
  * Handle to a remote object
@@ -128,7 +130,7 @@ class Download
         // See https://www.php.net/manual/en/function.error-get-last.php#113518
         // This will never be called because of the 0.
         set_error_handler('var_dump', 0);
-        Scope::exit(fn() => restore_error_handler());
+        $scope = Scope::exit(fn() => restore_error_handler());
 
         $totalWritten = 0;
 

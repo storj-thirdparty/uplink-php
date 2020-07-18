@@ -50,14 +50,9 @@ class SharePrefix
         $cSharePrefixesType = FFI::arrayType($ffi->type('SharePrefix'), [$count]);
         $cSharePrefixes = $ffi->new($cSharePrefixesType);
 
-        // TODO: split body in separate function
         foreach (Util::it($count) as $i) {
-            $cSharePrefix = $cSharePrefixes[$i];
-            $pCharBucket = Util::createCString($sharePrefixes[$i]->bucket, $scope);
-            $pCharPrefix = Util::createCString($sharePrefixes[$i]->prefix, $scope);
-
-            $cSharePrefix->bucket = $pCharBucket;
-            $cSharePrefix->prefix = $pCharPrefix;
+            $cSharePrefixes[$i]->bucket = Util::createCString($sharePrefixes[$i]->bucket, $scope);
+            $cSharePrefixes[$i]->prefix = Util::createCString($sharePrefixes[$i]->prefix, $scope);
         }
 
         return $cSharePrefixes;

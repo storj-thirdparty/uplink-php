@@ -59,7 +59,7 @@ class Upload
         // See https://www.php.net/manual/en/function.error-get-last.php#113518
         // This will never be called because of the 0.
         set_error_handler('var_dump', 0);
-        Scope::exit(fn() => restore_error_handler());
+        $scope = Scope::exit(fn() => restore_error_handler());
 
         while (!feof($resource)) {
             $content = @fread($resource, $chunkSize);
@@ -91,7 +91,7 @@ class Upload
     public function commit(): void
     {
         $pError = $this->ffi->upload_commit($this->cUpload);
-        Scope::exit(fn() => $this->ffi->free_error($pError));
+        $scope = Scope::exit(fn() => $this->ffi->free_error($pError));
 
         Util::throwIfError($pError);
     }
@@ -102,7 +102,7 @@ class Upload
     public function abort(): void
     {
         $pError = $this->ffi->upload_abort($this->cUpload);
-        Scope::exit(fn() => $this->ffi->free_error($pError));
+        $scope = Scope::exit(fn() => $this->ffi->free_error($pError));
 
         Util::throwIfError($pError);
     }
@@ -113,7 +113,7 @@ class Upload
     public function info(): ObjectInfo
     {
         $objectResult = $this->ffi->upload_info($this->cUpload);
-        Scope::exit(fn() => $this->ffi->free_object_result($objectResult));
+        $scope = Scope::exit(fn() => $this->ffi->free_object_result($objectResult));
 
         Util::throwIfErrorResult($objectResult);
 

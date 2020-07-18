@@ -197,16 +197,14 @@ class Project
     /**
      * @throws UplinkException
      */
-    public function deleteObject(string $bucketName, string $objectKey): void
+    public function deleteObject(string $bucketName, string $objectKey): ObjectInfo
     {
         $objectResult = $this->ffi->delete_object($this->cProject, $bucketName, $objectKey);
-        Scope::exit(fn() => $this->ffi->free_object_result($objectResult));
+        $scope = Scope::exit(fn() => $this->ffi->free_object_result($objectResult));
 
         Util::throwIfErrorResult($objectResult);
 
-        // TODO: there seems to be some garbage in this object
-        // But maybe it is only the metadata
-        //return ObjectInfo::fromCStruct($objectResult->object);
+        return ObjectInfo::fromCStruct($objectResult->object, true, true);
     }
 
     /**

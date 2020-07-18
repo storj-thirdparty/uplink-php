@@ -3,6 +3,7 @@
 namespace Storj\Uplink\Test;
 
 use Storj\Uplink\Access;
+use Storj\Uplink\Exception\Bucket\BucketNotEmpty;
 use Storj\Uplink\ListObjectsOptions;
 use Storj\Uplink\Project;
 use Storj\Uplink\Uplink;
@@ -56,11 +57,15 @@ class Util
         foreach ($project->listBuckets() as $bucket) {
             $bucketName = $bucket->getName();
 
-            foreach ($project->listObjects($bucketName, new ListObjectsOptions('', '', false, false, false)) as $objectInfo) {
+            foreach ($project->listObjects($bucketName, new ListObjectsOptions('', '', true, false, false)) as $objectInfo) {
                 $project->deleteObject($bucketName, $objectInfo->getKey());
             }
 
-            $project->deleteBucket($bucket->getName());
+            try {
+                $project->deleteBucket($bucket->getName());
+            } catch (BucketNotEmpty $e) {
+                // https://github.com/storj/storj/issues/3922
+            }
         }
     }
 }
