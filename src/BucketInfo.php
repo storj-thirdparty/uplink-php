@@ -4,7 +4,7 @@ namespace Storj\Uplink;
 
 use DateTimeImmutable;
 
-class Bucket
+class BucketInfo
 {
     private string $name;
 

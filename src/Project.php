@@ -9,7 +9,6 @@ use Generator;
 use Storj\Uplink\Exception\UplinkException;
 use Storj\Uplink\Internal\Scope;
 use Storj\Uplink\Internal\Util;
-use Storj\Uplink\Test\ListObjectsTest;
 
 class Project
 {
@@ -38,7 +37,7 @@ class Project
     /**
      * @throws UplinkException
      */
-    public function statBucket(string $bucketName): Bucket
+    public function statBucket(string $bucketName): BucketInfo
     {
         $bucketResult = $this->ffi->stat_bucket($this->cProject, $bucketName);
         $scope = Scope::exit(fn() => $this->ffi->free_bucket_result($bucketResult));
@@ -48,7 +47,7 @@ class Project
         $bucketType = $this->ffi->type('Bucket');
         $bucket = $this->ffi->cast($bucketType, $bucketResult->bucket[0]);
 
-        return new Bucket(
+        return new BucketInfo(
             FFI::string($bucket->name),
             DateTimeImmutable::createFromFormat('U', $bucket->created)
         );
@@ -57,7 +56,7 @@ class Project
     /**
      * @throws UplinkException
      */
-    public function createBucket(string $bucketName): Bucket
+    public function createBucket(string $bucketName): BucketInfo
     {
         $bucketResult = $this->ffi->create_bucket($this->cProject, $bucketName);
         $scope = Scope::exit(fn() => $this->ffi->free_bucket_result($bucketResult));
@@ -67,7 +66,7 @@ class Project
         $bucketType = $this->ffi->type('Bucket');
         $bucket = $this->ffi->cast($bucketType, $bucketResult->bucket[0]);
 
-        return new Bucket(
+        return new BucketInfo(
             FFI::string($bucket->name),
             DateTimeImmutable::createFromFormat('U', $bucket->created)
         );
@@ -76,7 +75,7 @@ class Project
     /**
      * @throws UplinkException
      */
-    public function ensureBucket(string $bucketName): Bucket
+    public function ensureBucket(string $bucketName): BucketInfo
     {
         $bucketResult = $this->ffi->ensure_bucket($this->cProject, $bucketName);
         $scope = Scope::exit(fn() => $this->ffi->free_bucket_result($bucketResult));
@@ -86,7 +85,7 @@ class Project
         $bucketType = $this->ffi->type('Bucket');
         $buck = $this->ffi->cast($bucketType, $bucketResult->bucket[0]);
 
-        return new Bucket(
+        return new BucketInfo(
             FFI::string($buck->name),
             DateTimeImmutable::createFromFormat('U', $buck->created)
         );
@@ -95,7 +94,7 @@ class Project
     /**
      * @throws UplinkException
      */
-    public function deleteBucket(string $bucketName): Bucket
+    public function deleteBucket(string $bucketName): BucketInfo
     {
         $bucketResult = $this->ffi->delete_bucket($this->cProject, $bucketName);
         $scope = Scope::exit(fn() => $this->ffi->free_bucket_result($bucketResult));
@@ -105,7 +104,7 @@ class Project
         $bucketType = $this->ffi->type('Bucket');
         $buck = $this->ffi->cast($bucketType, $bucketResult->bucket[0]);
 
-        return new Bucket(
+        return new BucketInfo(
             FFI::string($buck->name),
             DateTimeImmutable::createFromFormat('U', $buck->created)
         );
@@ -113,7 +112,7 @@ class Project
 
     /**
      * @param string|null $cursor bucket name after which to resume iteration
-     * @return Bucket[]|Generator<Bucket>
+     * @return BucketInfo[]|Generator<BucketInfo>
      * @throws UplinkException
      */
     public function listBuckets(?string $cursor = null): Generator
@@ -133,7 +132,7 @@ class Project
             $pBucket = $this->ffi->bucket_iterator_item($pBucketIterator);
             $innerScope = Scope::exit(fn() => $this->ffi->free_bucket($pBucket));
 
-            yield new Bucket(
+            yield new BucketInfo(
                 FFI::string($pBucket[0]->name),
                 DateTimeImmutable::createFromFormat('U', $pBucket[0]->created)
             );
@@ -232,7 +231,7 @@ class Project
             $pObject = $this->ffi->object_iterator_item($pObjectIterator);
             $innerScope = Scope::exit(fn() => $this->ffi->free_object($pObject));
 
-            // TODO: Why do we do [0] here but not when dereferencing ObjectResult::object?
+            // Why do we do [0] here but not when dereferencing ObjectResult::object?
             yield ObjectInfo::fromCStruct(
                 $pObject[0],
                 $listObjectsOptions->includeSystemMetadata(),
