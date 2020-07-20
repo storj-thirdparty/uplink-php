@@ -67,19 +67,19 @@ class Uplink
      * (Argon2). This should be a setup-only step. Most common interactions with the library
      * should be using a serialized access grant through ->parseAccess().
      *
-     * @param string $satellite_address including port, e.g.:
+     * @param string $satelliteAddress including port, e.g.:
      *     us-central-1.tardigrade.io:7777
      *     europe-west-1.tardigrade.io:7777
      *     asia-east-1.tardigrade.io:7777
-     * @param string $api_key
+     * @param string $apiKey
      * @param string $passphrase
      * @param Config|null $config
      *
      * @throws UplinkException
      */
     function requestAccessWithPassphrase(
-        string $satellite_address,
-        string $api_key,
+        string $satelliteAddress,
+        string $apiKey,
         string $passphrase,
         ?Config $config = null
     ): Access
@@ -89,13 +89,13 @@ class Uplink
             $cConfig = $config->toCStruct($this->ffi, $scope);
             $accessResult = $this->ffi->config_request_access_with_passphrase(
                 $cConfig,
-                $satellite_address,
-                $api_key,
+                $satelliteAddress,
+                $apiKey,
                 $passphrase
             );
             unset($configScope);
         } else {
-            $accessResult = $this->ffi->request_access_with_passphrase($satellite_address, $api_key, $passphrase);
+            $accessResult = $this->ffi->request_access_with_passphrase($satelliteAddress, $apiKey, $passphrase);
         }
         $scope->onExit(fn() => $this->ffi->free_access_result($accessResult));
 

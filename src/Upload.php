@@ -5,10 +5,14 @@ namespace Storj\Uplink;
 use FFI;
 use FFI\CData;
 use Storj\Uplink\Exception\IOException;
+use Storj\Uplink\Exception\Object\UploadDone;
 use Storj\Uplink\Exception\UplinkException;
 use Storj\Uplink\Internal\Scope;
 use Storj\Uplink\Internal\Util;
 
+/**
+ * An upload to the Storj network
+ */
 class Upload
 {
     private const CHUNKSIZE = 8000;
@@ -86,6 +90,7 @@ class Upload
     }
 
     /**
+     * @throws UploadDone when abort() or commit() has already been called
      * @throws UplinkException
      */
     public function commit(): void
@@ -97,6 +102,7 @@ class Upload
     }
 
     /**
+     * @throws UploadDone when abort() or commit() has already been called
      * @throws UplinkException
      */
     public function abort(): void

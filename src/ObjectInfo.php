@@ -10,14 +10,27 @@ class ObjectInfo
 {
     private string $key;
 
+    /**
+     * indicate whether the key is a prefix for other objects.
+     */
     private bool $isPrefix;
 
+    /**
+     * Null if @see ListObjectsOptions::$system was false
+     */
     private ?SystemMetadata $systemMetadata;
 
     /**
-     * hash map
+     * CustomMetadata contains a hash map with custom user metadata about the object.
      *
-     * @var string[]
+     * The keys and values in custom metadata are expected to be valid UTF-8.
+     *
+     * When choosing a custom key for your application start it with a prefix "app:key",
+     * as an example application named "Image Board" might use a key "image-board:title".
+     *
+     * Null if @see ListObjectsOptions::$custom was false
+     *
+     * @var string[]|null
      */
     private ?array $customMetaData;
 

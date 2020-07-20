@@ -9,7 +9,10 @@ use Storj\Uplink\Internal\Scope;
 use Storj\Uplink\Internal\Util;
 
 /**
- * Access grant
+ * An Access Grant contains everything to access a project and specific buckets.
+ * It includes a potentially-restricted API Key, a potentially-restricted set of
+ * encryption information, and information about the Satellite responsible for
+ * the project's metadata.
  */
 class Access
 {
@@ -39,6 +42,8 @@ class Access
     }
 
     /**
+     * Open project with the specific access grant
+     *
      * @throws UplinkException
      */
     public function openProject(?Config $config = null): Project
@@ -63,7 +68,7 @@ class Access
     }
 
     /**
-     * Create base58 encoded string for later use with @see Uplink::parseAccess()
+     * Create base58 encoded string for later use with @see Uplink::parseAccess() or other tools
      *
      * @throws UplinkException
      */
@@ -78,6 +83,15 @@ class Access
     }
 
     /**
+     * Share creates a new access grant with specific permissions.
+     *
+     * Access grants can only have their existing permissions restricted,
+     * and the resulting access grant will only allow for the intersection
+     * of all previous Share calls in the access grant construction chain.
+     *
+     * Prefixes, if provided, restrict the access grant (and internal encryption information)
+     * to only contain enough information to allow access to just those object key prefixes.
+     *
      * @param Permission $permission
      * @param SharePrefix[] $sharePrefixes
      *
@@ -91,7 +105,6 @@ class Access
 
         $accessResult = $this->ffi->access_share($this->cAccess, $cPermission, $cSharePrefixes, count($sharePrefixes));
         $scope->onExit(fn() => $this->ffi->free_access_result($accessResult));
-        unset($prefixScope);
 
         Util::throwIfErrorResult($accessResult);
 

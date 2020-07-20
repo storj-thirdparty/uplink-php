@@ -25,32 +25,34 @@ class ListObjectsOptions
     private string $cursor;
 
     /**
-     * Iterate the objects without collapsing prefixes.
+     * If true, "collapses", meaning return only full object keys and descend into prefixes
+     *
+     * If false, return prefixes and object keys but don't descend into prefixes
      */
     private bool $recursive;
 
     /**
-     * Include SystemMetadata in the results
+     * Include @see ObjectInfo::getSystemMetadata() in the results
      */
-    private bool $system;
+    private bool $includeSystemMetadata;
 
     /**
-     * Include CustomMetadata in the results
+     * Include @see ObjectInfo::getCustomMetadata() in the results
      */
-    private bool $custom;
+    private bool $includeCustomMetadata;
 
     public function __construct(
         string $prefix = '',
         string $cursor = '',
         bool $recursive = false,
-        bool $system = false,
-        bool $custom = false
+        bool $includeSystemMetadata = false,
+        bool $includeCustomMetadata = false
     ) {
         $this->prefix = $prefix;
         $this->cursor = $cursor;
         $this->recursive = $recursive;
-        $this->system = $system;
-        $this->custom = $custom;
+        $this->includeSystemMetadata = $includeSystemMetadata;
+        $this->includeCustomMetadata = $includeCustomMetadata;
     }
 
     public function toCStruct(FFI $ffi, Scope $scope): CData
@@ -60,19 +62,19 @@ class ListObjectsOptions
         $cListObjectsOptions->prefix = Util::createCString($this->prefix, $scope);
         $cListObjectsOptions->cursor = Util::createCString($this->cursor, $scope);
         $cListObjectsOptions->recursive = $this->recursive;
-        $cListObjectsOptions->system = $this->system;
-        $cListObjectsOptions->custom = $this->custom;
+        $cListObjectsOptions->system = $this->includeSystemMetadata;
+        $cListObjectsOptions->custom = $this->includeCustomMetadata;
 
         return $cListObjectsOptions;
     }
 
     public function includeSystemMetadata(): bool
     {
-        return $this->system;
+        return $this->includeSystemMetadata;
     }
 
     public function includeCustomMetadata(): bool
     {
-        return $this->custom;
+        return $this->includeCustomMetadata;
     }
 }

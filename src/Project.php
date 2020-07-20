@@ -6,6 +6,8 @@ use DateTimeImmutable;
 use FFI;
 use FFI\CData;
 use Generator;
+use Storj\Uplink\Exception\Bucket\BucketAlreadyExists;
+use Storj\Uplink\Exception\Bucket\BucketNotEmpty;
 use Storj\Uplink\Exception\UplinkException;
 use Storj\Uplink\Internal\Scope;
 use Storj\Uplink\Internal\Util;
@@ -35,6 +37,8 @@ class Project
     }
 
     /**
+     * Fetch information about a bucket
+     *
      * @throws UplinkException
      */
     public function statBucket(string $bucketName): BucketInfo
@@ -54,6 +58,7 @@ class Project
     }
 
     /**
+     * @throws BucketAlreadyExists if it already exists
      * @throws UplinkException
      */
     public function createBucket(string $bucketName): BucketInfo
@@ -73,6 +78,8 @@ class Project
     }
 
     /**
+     * Check that a bucket exists and create a new one if it doesn't.
+     *
      * @throws UplinkException
      */
     public function ensureBucket(string $bucketName): BucketInfo
@@ -92,6 +99,7 @@ class Project
     }
 
     /**
+     * @throws BucketNotEmpty if there are objects in the bucket
      * @throws UplinkException
      */
     public function deleteBucket(string $bucketName): BucketInfo
@@ -146,6 +154,8 @@ class Project
     }
 
     /**
+     * Start a download from the specified key
+     *
      * @throws UplinkException
      */
     public function downloadObject(string $bucketName, string $objectKey, ?DownloadOptions $downloadOptions = null): Download

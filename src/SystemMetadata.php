@@ -5,6 +5,9 @@ namespace Storj\Uplink;
 use DateTimeImmutable;
 use FFI\CData;
 
+/**
+ * Information about the object that cannot be changed directly
+ */
 class SystemMetadata
 {
     private DateTimeImmutable $created;

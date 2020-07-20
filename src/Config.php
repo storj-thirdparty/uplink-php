@@ -7,14 +7,14 @@ use Storj\Uplink\Internal\Scope;
 use Storj\Uplink\Internal\Util;
 
 /**
- * Optional parameters when connecting
+ * Parameters when connecting
  */
 class Config
 {
     private string $userAgent;
 
     /**
-     * Timeout to establish connection to peers
+     * How long the client should wait for establishing a connection to peers.
      */
     private int $dialTimeoutMilliseconds;
 

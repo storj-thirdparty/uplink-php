@@ -2,12 +2,9 @@
 
 namespace Storj\Uplink;
 
-use DateTimeImmutable;
-use Exception;
 use FFI;
 use FFI\CData;
 use Generator;
-use IteratorAggregate;
 use Psr\Http\Message\StreamInterface;
 use Storj\Uplink\Exception\IOException;
 use Storj\Uplink\Exception\UplinkException;
@@ -16,7 +13,7 @@ use Storj\Uplink\Internal\Util;
 use Storj\Uplink\Psr\ReadStream;
 
 /**
- * Handle to a remote object
+ * Handle to a remote object on the Storj network
  *
  * TODO: can the download be read only once? Should we protect against reading it twice?
  */
