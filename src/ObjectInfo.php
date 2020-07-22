@@ -16,7 +16,7 @@ class ObjectInfo
     private bool $isPrefix;
 
     /**
-     * Null if @see ListObjectsOptions::$system was false
+     * Null if @see ListObjectsOptions::$includeSystemMetadata was false
      */
     private ?SystemMetadata $systemMetadata;
 
@@ -28,32 +28,23 @@ class ObjectInfo
      * When choosing a custom key for your application start it with a prefix "app:key",
      * as an example application named "Image Board" might use a key "image-board:title".
      *
-     * Null if @see ListObjectsOptions::$custom was false
+     * Null if @see ListObjectsOptions::$includeCustomMetadata was false
      *
      * @var string[]|null
      */
     private ?array $customMetaData;
 
-    public function __construct(string $key, bool $isPrefix, ?SystemMetadata $system, ?array $customMetaData)
-    {
-        $this->key = $key;
-        $this->isPrefix = $isPrefix;
-        $this->systemMetadata = $system;
-        $this->customMetaData = $customMetaData;
-    }
-
     /**
      * @internal
      */
-    public static function fromCStruct(
+    public function __construct(
         CData $cObjectInfo,
         bool $includeSystemMetadata,
         bool $includeCustomMetaData
-    ): self
-    {
+    ) {
         $systemMetaData = null;
         if ($includeSystemMetadata) {
-            $systemMetaData = SystemMetadata::fromCStruct($cObjectInfo->system);
+            $systemMetaData = new SystemMetadata($cObjectInfo->system);
         }
 
         $customMetaData = null;
@@ -61,12 +52,10 @@ class ObjectInfo
             $customMetaData = self::createCustomMetaDataFromCStruct($cObjectInfo->custom);
         }
 
-        return new ObjectInfo(
-            FFI::string($cObjectInfo->key),
-            $cObjectInfo->is_prefix,
-            $systemMetaData,
-            $customMetaData
-        );
+        $this->key = FFI::string($cObjectInfo->key);
+        $this->isPrefix = $cObjectInfo->is_prefix;
+        $this->systemMetadata = $systemMetaData;
+        $this->customMetaData = $customMetaData;
     }
 
     /**

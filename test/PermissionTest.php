@@ -9,17 +9,17 @@ use Storj\Uplink\Exception\UplinkException;
 
 class PermissionTest extends TestCase
 {
-    public function testEmptyPermissionThrows()
+    public function testEmptyPermissionThrows(): void
     {
         $this->expectException(UplinkException::class);
 
         $access = Util::emptyAccess()->share(
-            new Permission(false, false, false, false),
+            new Permission(),
             [new SharePrefix('phpunit', '')]
         );
     }
 
-    public function testShareCantAccessOtherBucket()
+    public function testShareCantAccessOtherBucket(): void
     {
         $mainAccess = Util::emptyAccess();
         $mainProject = $mainAccess->openProject();
@@ -27,7 +27,7 @@ class PermissionTest extends TestCase
         $mainProject->createBucket('phpunit2');
 
         $access = $mainAccess->share(
-            new Permission(true, true, true, true),
+            Permission::fullPermission(),
             [new SharePrefix('phpunit1', '')]
         );
 
@@ -43,7 +43,7 @@ class PermissionTest extends TestCase
         $upload->commit();
     }
 
-    public function testShareCantAccessOtherPrefix()
+    public function testShareCantAccessOtherPrefix(): void
     {
         $mainAccess = Util::emptyAccess();
         $mainProject = $mainAccess->openProject();
@@ -57,7 +57,7 @@ class PermissionTest extends TestCase
         $upload2->commit();
 
         $access = $mainAccess->share(
-            new Permission(true, true, true, true),
+            Permission::fullPermission(),
             [new SharePrefix('phpunit1', 'prefix1')]
         );
 

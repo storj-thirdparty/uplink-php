@@ -31,6 +31,9 @@ class Access
      */
     private Scope $scope;
 
+    /**
+     * @internal
+     */
     public function __construct(
         FFI $ffi,
         CData $cAccess,
@@ -52,7 +55,6 @@ class Access
         if ($config) {
             $cConfig = $config->toCStruct($this->ffi, $scope);
             $projectResult = $this->ffi->config_open_project($cConfig, $this->cAccess);
-            unset($configScope);
         } else {
             $projectResult = $this->ffi->open_project($this->cAccess);
         }

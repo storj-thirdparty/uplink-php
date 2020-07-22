@@ -38,7 +38,9 @@ class ListObjectsTest extends TestCase
         $objects = iterator_to_array(
             $project->listObjects(
                 'phpunit',
-                new ListObjectsOptions('', '', false, true, true)
+                (new ListObjectsOptions())
+                    ->withSystemMetadata()
+                    ->withCustomMetadata()
             )
         );
         self::assertCount(1, $objects);

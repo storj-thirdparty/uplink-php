@@ -40,7 +40,7 @@ class Uplink
      * This should be the main way to instantiate an access grant for opening a project.
      * @see requestAccessWithPassphrase.
      *
-     * @param string base58 encoded $accessString
+     * @param string $accessString base58 encoded $accessString
      *
      * @throws UplinkException
      */
@@ -93,7 +93,6 @@ class Uplink
                 $apiKey,
                 $passphrase
             );
-            unset($configScope);
         } else {
             $accessResult = $this->ffi->request_access_with_passphrase($satelliteAddress, $apiKey, $passphrase);
         }

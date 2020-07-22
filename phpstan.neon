@@ -1,0 +1,24 @@
+parameters:
+    level: 6
+    paths:
+        - src
+        - test
+    ignoreErrors:
+        - '/Call to an undefined method FFI::.*/'
+        - '/Access to an undefined property FFI\\CData::.*/'
+        - '/Cannot access offset int on FFI\\CData./'
+        - '/Cannot access offset 0 on FFI\\CData./'
+        -
+            message: '/Result of static method FFI::free\(\) \(void\) is used./'
+            paths:
+                - src/Internal/Util.php
+                - src/Upload.php
+        -
+            message: '/Anonymous function with return type void returns void but should not return anything./'
+            paths:
+                - src/Internal/Util.php
+                - src/Upload.php
+        -
+            message: '/Binary operation "-" between string and string results in an error./'
+            paths:
+                - test/ListObjectsTest.php

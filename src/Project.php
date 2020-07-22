@@ -29,6 +29,9 @@ class Project
      */
     private Scope $scope;
 
+    /**
+     * @internal
+     */
     public function __construct(FFI $ffi, CData $cProject, Scope $scope)
     {
         $this->ffi = $ffi;
@@ -49,12 +52,9 @@ class Project
         Util::throwIfErrorResult($bucketResult);
 
         $bucketType = $this->ffi->type('Bucket');
-        $bucket = $this->ffi->cast($bucketType, $bucketResult->bucket[0]);
+        $cBucket = $this->ffi->cast($bucketType, $bucketResult->bucket[0]);
 
-        return new BucketInfo(
-            FFI::string($bucket->name),
-            DateTimeImmutable::createFromFormat('U', $bucket->created)
-        );
+        return new BucketInfo($cBucket);
     }
 
     /**
@@ -69,12 +69,9 @@ class Project
         Util::throwIfErrorResult($bucketResult);
 
         $bucketType = $this->ffi->type('Bucket');
-        $bucket = $this->ffi->cast($bucketType, $bucketResult->bucket[0]);
+        $cBucket = $this->ffi->cast($bucketType, $bucketResult->bucket[0]);
 
-        return new BucketInfo(
-            FFI::string($bucket->name),
-            DateTimeImmutable::createFromFormat('U', $bucket->created)
-        );
+        return new BucketInfo($cBucket);
     }
 
     /**
@@ -90,12 +87,9 @@ class Project
         Util::throwIfErrorResult($bucketResult);
 
         $bucketType = $this->ffi->type('Bucket');
-        $buck = $this->ffi->cast($bucketType, $bucketResult->bucket[0]);
+        $cBucket = $this->ffi->cast($bucketType, $bucketResult->bucket[0]);
 
-        return new BucketInfo(
-            FFI::string($buck->name),
-            DateTimeImmutable::createFromFormat('U', $buck->created)
-        );
+        return new BucketInfo($cBucket);
     }
 
     /**
@@ -110,12 +104,9 @@ class Project
         Util::throwIfErrorResult($bucketResult);
 
         $bucketType = $this->ffi->type('Bucket');
-        $buck = $this->ffi->cast($bucketType, $bucketResult->bucket[0]);
+        $cBucket = $this->ffi->cast($bucketType, $bucketResult->bucket[0]);
 
-        return new BucketInfo(
-            FFI::string($buck->name),
-            DateTimeImmutable::createFromFormat('U', $buck->created)
-        );
+        return new BucketInfo($cBucket);
     }
 
     /**
@@ -140,10 +131,7 @@ class Project
             $pBucket = $this->ffi->bucket_iterator_item($pBucketIterator);
             $innerScope = Scope::exit(fn() => $this->ffi->free_bucket($pBucket));
 
-            yield new BucketInfo(
-                FFI::string($pBucket[0]->name),
-                DateTimeImmutable::createFromFormat('U', $pBucket[0]->created)
-            );
+            yield new BucketInfo($pBucket[0]);
         }
 
         // how to trigger this?
@@ -214,7 +202,7 @@ class Project
 
         Util::throwIfErrorResult($objectResult);
 
-        return ObjectInfo::fromCStruct($objectResult->object, true, true);
+        return new ObjectInfo($objectResult->object, true, true);
     }
 
     /**
@@ -240,7 +228,7 @@ class Project
             $innerScope = Scope::exit(fn() => $this->ffi->free_object($pObject));
 
             // Why do we do [0] here but not when dereferencing ObjectResult::object?
-            yield ObjectInfo::fromCStruct(
+            yield new ObjectInfo(
                 $pObject[0],
                 $listObjectsOptions->includeSystemMetadata(),
                 $listObjectsOptions->includeCustomMetadata()

@@ -23,7 +23,7 @@ class SharePrefix
      */
     private string $prefix;
 
-    public function __construct(string $bucket, string $prefix)
+    public function __construct(string $bucket, string $prefix = '')
     {
         $this->bucket = $bucket;
         $this->prefix = $prefix;

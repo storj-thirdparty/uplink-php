@@ -83,6 +83,9 @@ class Util
         }
     }
 
+    /**
+     * @param mixed $var
+     */
     public static function printType($var): string
     {
         if (is_object($var)) {

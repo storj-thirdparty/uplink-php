@@ -16,21 +16,21 @@ class Permission
      *
      * Allows getting object metadata, but does not allow listing buckets.
      */
-    private bool $allowDownload;
+    private bool $allowDownload = false;
 
     /**
      * Give permission to create buckets and upload new objects.
      *
      * Does not allow overwriting existing objects unless @see $allowDelete is granted too
      */
-    private bool $allowUpload;
+    private bool $allowUpload = false;
 
     /**
      * Give permission to list buckets and read object metadata.
      *
      * Does not allow downloading the object's content
      */
-    private bool $allowList;
+    private bool $allowList = false;
 
     /**
      * Gives permission to delete buckets and objects
@@ -38,35 +38,19 @@ class Permission
      * Unless @see $allowDownload or @see $allowList is granted too,
      * no object metadata and no error info will be returned for deleted objects.
      */
-    private bool $allowDelete;
+    private bool $allowDelete = false;
 
     /**
      * When the permission starts working
      * Relies on Satellite time
      */
-    private ?DateTimeImmutable $notBefore;
+    private ?DateTimeImmutable $notBefore = null;
 
     /**
      * When the permission expires
      * Relies on Satellite time
      */
-    private ?DateTimeImmutable $notAfter;
-
-    public function __construct(
-        bool $allowDownload,
-        bool $allowUpload,
-        bool $allowList,
-        bool $allowDelete,
-        ?DateTimeImmutable $notBefore = null,
-        ?DateTimeImmutable $notAfter = null
-    ) {
-        $this->allowDownload = $allowDownload;
-        $this->allowUpload = $allowUpload;
-        $this->allowList = $allowList;
-        $this->allowDelete = $allowDelete;
-        $this->notBefore = $notBefore;
-        $this->notAfter = $notAfter;
-    }
+    private ?DateTimeImmutable $notAfter = null;
 
     /**
      * Create a Permission that allows reading and listing
@@ -74,7 +58,11 @@ class Permission
      */
     public static function readOnlyPermission(): self
     {
-        return new self(true, false, true, false, null, null);
+        $self = new self();
+        $self->allowDownload = true;
+        $self->allowList = true;
+
+        return $self;
     }
 
     /**
@@ -83,7 +71,13 @@ class Permission
      */
     public static function fullPermission(): self
     {
-        return new self(true, true, true, true, null, null);
+        $self = new self();
+        $self->allowDownload = true;
+        $self->allowList = true;
+        $self->allowDelete = true;
+        $self->allowUpload = true;
+
+        return $self;
     }
 
     /**
@@ -92,9 +86,58 @@ class Permission
      */
     public static function writeOnlyPermission(): self
     {
-        return new self(false, true, false, true, null, null);
+        $self = new self();
+        $self->allowDelete = true;
+        $self->allowUpload = true;
+
+        return $self;
     }
 
+    public function allowDownload(bool $allowDownload = true): self
+    {
+        $clone = clone $this;
+        $this->allowDownload = $allowDownload;
+        return $clone;
+    }
+
+    public function allowList(bool $allowList = true): self
+    {
+        $clone = clone $this;
+        $this->allowList = $allowList;
+        return $clone;
+    }
+
+    public function allowDelete(bool $allowDelete = true): self
+    {
+        $clone = clone $this;
+        $this->allowDelete = $allowDelete;
+        return $clone;
+    }
+
+    public function allowUpload(bool $allowUpload = true): self
+    {
+        $clone = clone $this;
+        $this->allowUpload = $allowUpload;
+        return $clone;
+    }
+
+    public function notBefore(?DateTimeImmutable $notBefore): self
+    {
+        $clone = clone $this;
+        $this->notBefore = $notBefore;
+        return $clone;
+    }
+
+    public function notAfter(?DateTimeImmutable $notAfter): self
+    {
+        $clone = clone $this;
+        $this->notAfter = $notAfter;
+        return $clone;
+    }
+
+    /**
+     * @internal
+     */
     public function toCStruct(FFI $ffi): CData
     {
         $cPermission = $ffi->new('Permission');

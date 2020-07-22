@@ -16,14 +16,10 @@ class SystemMetadata
 
     private int $contentLength;
 
-    public function __construct(DateTimeImmutable $created, ?DateTimeImmutable $expires, int $contentLength)
-    {
-        $this->created = $created;
-        $this->expires = $expires;
-        $this->contentLength = $contentLength;
-    }
-
-    public static function fromCStruct(CData $cSystemMetaData): self
+    /**
+     * @internal
+     */
+    public function __construct(CData $cSystemMetaData)
     {
         $created = DateTimeImmutable::createFromFormat('U', $cSystemMetaData->created);
 
@@ -32,7 +28,9 @@ class SystemMetadata
             $expires = DateTimeImmutable::createFromFormat('U', $cSystemMetaData->expires);
         }
 
-        return new SystemMetadata($created, $expires, $cSystemMetaData->content_length);
+        $this->created = $created;
+        $this->expires = $expires;
+        $this->contentLength = $cSystemMetaData->content_length;
     }
 
     public function getCreated(): DateTimeImmutable

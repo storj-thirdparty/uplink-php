@@ -20,7 +20,7 @@ class DownloadTest extends TestCase
         $upload->commit();
     }
 
-    public function testSmallChunks()
+    public function testSmallChunks(): void
     {
         $download = Util::project()->downloadObject('phpunit', 'DownloadTest');
         $chunk1 = $download->read(2);
@@ -37,7 +37,7 @@ class DownloadTest extends TestCase
         self::assertEquals(self::$content, $chunk1 . $chunk2 . $rest);
     }
 
-    public function testOffsetAndLength()
+    public function testOffsetAndLength(): void
     {
         $download = Util::project()->downloadObject('phpunit', 'DownloadTest', new DownloadOptions(10, 4));
 

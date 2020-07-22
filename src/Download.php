@@ -39,6 +39,9 @@ class Download
      */
     private Scope $scope;
 
+    /**
+     * @internal
+     */
     public function __construct(
         FFI $ffi,
         CData $cDownload,
@@ -56,7 +59,7 @@ class Download
 
         Util::throwIfErrorResult($objectResult);
 
-        return ObjectInfo::fromCStruct($objectResult->object, true, true);
+        return new ObjectInfo($objectResult->object, true, true);
     }
 
     /**
@@ -126,7 +129,7 @@ class Download
         // We'll thrown an exception instead.
         // See https://www.php.net/manual/en/function.error-get-last.php#113518
         // This will never be called because of the 0.
-        set_error_handler('var_dump', 0);
+        set_error_handler(null, 0);
         $scope = Scope::exit(fn() => restore_error_handler());
 
         $totalWritten = 0;

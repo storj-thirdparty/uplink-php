@@ -9,7 +9,7 @@ use Storj\Uplink\Exception\UplinkException;
 
 class UplinkTest extends TestCase
 {
-    public function testAccessWithPassPhrase()
+    public function testAccessWithPassPhrase(): void
     {
         $uplink = Uplink::create();
         $access = $uplink->requestAccessWithPassphrase(
@@ -21,7 +21,7 @@ class UplinkTest extends TestCase
         self::assertTrue(true);
     }
 
-    public function testAccessWithAccessString()
+    public function testAccessWithAccessString(): void
     {
         $uplink = Uplink::create();
         $access = $uplink->requestAccessWithPassphrase(
@@ -35,19 +35,19 @@ class UplinkTest extends TestCase
         self::assertTrue(true);
     }
 
-    public function testAccessWithConfig()
+    public function testAccessWithConfig(): void
     {
         $access = Uplink::create()->requestAccessWithPassphrase(
             getenv('SATTELITE_ADDRESS'),
             getenv('API_KEY'),
             'mypassphrase',
-            new Config(null, 10_000, null)
+            new Config()
         );
 
         self::assertTrue(true);
     }
 
-    public function test1msTimeoutLeadsToException()
+    public function test1msTimeoutLeadsToException(): void
     {
         $this->expectException(UplinkException::class);
 
@@ -55,7 +55,7 @@ class UplinkTest extends TestCase
             getenv('SATTELITE_ADDRESS'),
             getenv('API_KEY'),
             'mypassphrase',
-            new Config(null, 1, null)
+            (new Config())->withDialTimeoutMilliseconds(1)
         );
     }
 }

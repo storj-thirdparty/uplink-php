@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
  */
 class LargeObjectMemoryUsageTest extends TestCase
 {
-    public function testUploadAndDownloadLargeFile()
+    public function testUploadAndDownloadLargeFile(): void
     {
         self::assertLessThan(20_000_000, memory_get_peak_usage());
 

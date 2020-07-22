@@ -8,30 +8,26 @@ use Storj\Uplink\Exception\UplinkException;
 
 class AccessTest extends TestCase
 {
-    public function testOpenProject()
+    public function testOpenProject(): void
     {
         $project = Util::access()->openProject();
 
         self::assertTrue(true);
     }
 
-    public function testOpenProjectWithConfig()
+    public function testOpenProjectWithConfig(): void
     {
-        $project = Util::access()->openProject(
-            new Config(null, 10_000, null)
-        );
+        $project = Util::access()->openProject(new Config());
 
         self::assertTrue(true);
     }
 
-    public function test1msTimeoutLeadsToException()
+    public function test1msTimeoutLeadsToException(): void
     {
         self::expectException(UplinkException::class);
 
         $project = Util::access()->openProject(
-            new Config(null, 1, null)
+            (new Config())->withDialTimeoutMilliseconds(1)
         );
-
-        self::assertTrue(true);
     }
 }

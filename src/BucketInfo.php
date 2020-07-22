@@ -3,6 +3,8 @@
 namespace Storj\Uplink;
 
 use DateTimeImmutable;
+use FFI;
+use FFI\CData;
 
 class BucketInfo
 {
@@ -10,10 +12,13 @@ class BucketInfo
 
     private DateTimeImmutable $created;
 
-    public function __construct(string $name, DateTimeImmutable $created)
+    /**
+     * @internal
+     */
+    public function __construct(CData $cBucket)
     {
-        $this->name = $name;
-        $this->created = $created;
+        $this->name = FFI::string($cBucket->name);
+        $this->created = DateTimeImmutable::createFromFormat('U', $cBucket->created);
     }
 
     public function getName(): string

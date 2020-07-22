@@ -11,12 +11,12 @@ use Storj\Uplink\Internal\Util;
  */
 class Config
 {
-    private string $userAgent;
+    private string $userAgent = 'uplink-php';
 
     /**
      * How long the client should wait for establishing a connection to peers.
      */
-    private int $dialTimeoutMilliseconds;
+    private int $dialTimeoutMilliseconds = 10_000;
 
     /**
      * Where to save data during downloads to use less memory.
@@ -24,13 +24,35 @@ class Config
      */
     private string $tempDirectory;
 
-    public function __construct(?string $userAgent, int $dialTimeoutMilliseconds, ?string $tempDirectory)
+    public function __construct()
     {
-        $this->userAgent = $userAgent ?? 'uplink-php';
-        $this->dialTimeoutMilliseconds = $dialTimeoutMilliseconds;
         $this->tempDirectory = $tempDirectory ?? sys_get_temp_dir();
     }
 
+    public function withUserAgent(string $userAgent): self
+    {
+        $clone = clone $this;
+        $clone->userAgent = $userAgent;
+        return $clone;
+    }
+
+    public function withDialTimeoutMilliseconds(int $dialTimeoutMilliseconds): self
+    {
+        $clone = clone $this;
+        $clone->dialTimeoutMilliseconds = $dialTimeoutMilliseconds;
+        return $clone;
+    }
+
+    public function withTempDirectory(string $tempDirectory): self
+    {
+        $clone = clone $this;
+        $clone->tempDirectory = $tempDirectory;
+        return $clone;
+    }
+
+    /**
+     * @internal
+     */
     public function toCStruct(FFI $ffi, Scope $scope): FFI\CData
     {
         $cUserAgent = Util::createCString($this->userAgent, $scope);

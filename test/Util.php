@@ -10,9 +10,9 @@ use Storj\Uplink\Uplink;
 
 class Util
 {
-    private static $access;
+    private static ?Access $access = null;
 
-    private static $project;
+    private static ?Project $project = null;
 
     public static function access(): Access
     {
@@ -57,7 +57,7 @@ class Util
         foreach ($project->listBuckets() as $bucket) {
             $bucketName = $bucket->getName();
 
-            foreach ($project->listObjects($bucketName, new ListObjectsOptions('', '', true, false, false)) as $objectInfo) {
+            foreach ($project->listObjects($bucketName, (new ListObjectsOptions())->withRecursive()) as $objectInfo) {
                 $project->deleteObject($bucketName, $objectInfo->getKey());
             }
 

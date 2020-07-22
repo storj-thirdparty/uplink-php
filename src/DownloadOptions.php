@@ -17,6 +17,9 @@ class DownloadOptions
         $this->length = $length;
     }
 
+    /**
+     * @internal
+     */
     public function toCStruct(FFI $ffi): CData
     {
         $cDownloadOptions = $ffi->new('DownloadOptions');

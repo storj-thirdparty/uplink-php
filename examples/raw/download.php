@@ -38,7 +38,7 @@ if ($filename) {
 
 $nFiles = 0;
 $listHtml = '<ul>';
-foreach ($project->listObjects('raw', new ListObjectsOptions('', '', false, true, true)) as $objectInfo) {
+foreach ($project->listObjects('raw', (new ListObjectsOptions())->withSystemMetadata()) as $objectInfo) {
     $nFiles += 1;
     $name = htmlspecialchars($objectInfo->getKey());
     $size = $objectInfo->getSystemMetadata()->getContentLength();
