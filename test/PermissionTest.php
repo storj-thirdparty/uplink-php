@@ -15,7 +15,7 @@ class PermissionTest extends TestCase
 
         $access = Util::emptyAccess()->share(
             new Permission(),
-            [new SharePrefix('phpunit', '')]
+            new SharePrefix('phpunit', '')
         );
     }
 
@@ -28,7 +28,7 @@ class PermissionTest extends TestCase
 
         $access = $mainAccess->share(
             Permission::fullPermission(),
-            [new SharePrefix('phpunit1', '')]
+            new SharePrefix('phpunit1', '')
         );
 
         $project = $access->openProject();
@@ -58,7 +58,7 @@ class PermissionTest extends TestCase
 
         $access = $mainAccess->share(
             Permission::fullPermission(),
-            [new SharePrefix('phpunit1', 'prefix1')]
+            new SharePrefix('phpunit1', 'prefix1')
         );
 
         $access->openProject()->downloadObject('phpunit1', 'prefix1/key1');

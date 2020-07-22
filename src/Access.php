@@ -95,11 +95,12 @@ class Access
      * to only contain enough information to allow access to just those object key prefixes.
      *
      * @param Permission $permission
-     * @param SharePrefix[] $sharePrefixes
+     * @param SharePrefix ...$sharePrefixes
      *
+     * @return Access
      * @throws UplinkException
      */
-    public function share(Permission $permission, array $sharePrefixes): Access
+    public function share(Permission $permission, SharePrefix ...$sharePrefixes): Access
     {
         $scope = new Scope();
         $cPermission = $permission->toCStruct($this->ffi);

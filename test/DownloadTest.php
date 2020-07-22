@@ -39,7 +39,11 @@ class DownloadTest extends TestCase
 
     public function testOffsetAndLength(): void
     {
-        $download = Util::project()->downloadObject('phpunit', 'DownloadTest', new DownloadOptions(10, 4));
+        $download = Util::project()->downloadObject(
+            'phpunit',
+            'DownloadTest',
+            (new DownloadOptions())->withOffset(10)->withLength(4)
+        );
 
         self::assertEquals(
             substr(self::$content, 10, 4),

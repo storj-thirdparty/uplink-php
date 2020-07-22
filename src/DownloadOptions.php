@@ -7,14 +7,24 @@ use FFI\CData;
 
 class DownloadOptions
 {
-    private int $offset;
+    private int $offset = 0;
 
-    private ?int $length;
+    private ?int $length = null;
 
-    public function __construct(int $offset, ?int $length = null)
+    public function withOffset(int $offset): self
     {
-        $this->offset = $offset;
-        $this->length = $length;
+        $clone = clone $this;
+        $clone->offset = $offset;
+
+        return $clone;
+    }
+
+    public function withLength(int $length): self
+    {
+        $clone = clone $this;
+        $clone->length = $length;
+
+        return $clone;
     }
 
     /**
