@@ -47,11 +47,33 @@ pipeline {
                 sh 'phpstan analyse'
             }
         }
+        // need to go from declarative to scripted pipeline
+        // for sidecar container
+
         stage('PHPUnit') {
+            agent {
+                label 'main'
+            }
             steps {
                 unstash "vendor"
                 unstash "build"
-                sh './vendor/bin/phpunit test/'
+                script {
+                    docker.build("storj-ci", "--pull https://github.com/storj/ci.git")
+                        .withRun('', ''' sh -c "
+                            service postgresql start
+                            && cockroach start-single-node --insecure --store=\'/tmp/crdb\' --listen-addr=localhost:26257 --http-addr=localhost:8080 --cache 512MiB --max-sql-memory 512MiB --background
+                            && cockroach sql --insecure --host=localhost:26257 -e \'create database testcockroach;\'
+                            && psql -U postgres -c \'create database teststorj;\'
+                            && use-ports -from 1024 -to 10000
+                            && sleep 30"
+                            '''.replaceAll("\\s", ' ')
+                        ) { container ->
+                            docker.image('php:7.4-cli').inside("--link ${container.id}:storj-ci") {
+                                sh './vendor/bin/phpunit test/'
+                            }
+
+                    }
+                }
             }
         }
     }
