@@ -2,7 +2,7 @@ pipeline {
     agent none
 
     options {
-          timeout(time: 26, unit: 'MINUTES')
+          timeout(time: 20, unit: 'MINUTES')
     }
     stages {
         stage('Go build') {
@@ -10,7 +10,7 @@ pipeline {
                 docker {
                     label 'main'
                     image docker.build("storj-ci", "--pull https://github.com/storj/ci.git").id
-                    args '-u root:root --cap-add SYS_PTRACE -v "/tmp/gomod":/go/pkg/mod '
+                    args '--user root:root --cap-add SYS_PTRACE -v "/tmp/gomod":/go/pkg/mod '
                 }
             }
             steps {
@@ -59,17 +59,34 @@ pipeline {
                 unstash "build"
                 script {
                     docker.build("storj-ci", "--pull https://github.com/storj/ci.git")
-                        .withRun('', ''' sh -c "
+                        .withRun("-v /tmp/gomod:/go/pkg/mod -p 10000:10000 --mount type=bind,src=$WORKSPACE,dst=/parent", ''' sh -c "
                             service postgresql start
-                            && cockroach start-single-node --insecure --store=\'/tmp/crdb\' --listen-addr=localhost:26257 --http-addr=localhost:8080 --cache 512MiB --max-sql-memory 512MiB --background
-                            && cockroach sql --insecure --host=localhost:26257 -e \'create database testcockroach;\'
-                            && psql -U postgres -c \'create database teststorj;\'
-                            && use-ports -from 1024 -to 10000
-                            && sleep 30"
+                            && psql -U postgres -c 'create database teststorj;'
+                            && git clone https://github.com/storj/storj.git storj
+                            && cd storj
+                            && make install-sim
+                            && storj-sim network setup --host storj-ci --postgres=postgres://postgres@localhost/teststorj?sslmode=disable
+                            && storj-sim network env > ../dotenv
+                            && storj-sim network run"
                             '''.replaceAll("\\s", ' ')
                         ) { container ->
-                            docker.image('php:7.4-cli').inside("--link ${container.id}:storj-ci") {
-                                sh './vendor/bin/phpunit test/'
+                            // wait until storj-sim has started and environment variables are available
+                            sh '''while [ ! -f dotenv ];
+                                do sleep 1;
+                                done;
+                                sleep 60
+                            '''
+                            //sh "docker logs --follow ${container.id}"
+                            docker.image('php:7.4-cli').inside("--user root:root --link ${container.id}:storj-ci") {\
+                                sh '''
+                                    apt-get update
+                                    apt-get install -y libffi-dev
+                                    docker-php-ext-install ffi
+                                    export $(cat dotenv | xargs);
+                                    export SATELLITE_ADDRESS=$SATELLITE_0_ID@storj-ci:10000
+                                    export API_KEY=13YqgH45XZLg7nm6KsQ72QgXfjbDu2uhTaeSdMVP2A85QuANthM9K58ww5Y4nhMowrZDoqdA4Kyqt1ioQghQcm9fT5uR2drPHpFEqeb
+                                    ./vendor/bin/phpunit test/
+                                '''
                             }
 
                     }

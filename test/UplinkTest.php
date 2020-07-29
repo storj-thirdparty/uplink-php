@@ -13,7 +13,7 @@ class UplinkTest extends TestCase
     {
         $uplink = Uplink::create();
         $access = $uplink->requestAccessWithPassphrase(
-            getenv('SATTELITE_ADDRESS'),
+            getenv('SATELLITE_ADDRESS'),
             getenv('API_KEY'),
             'mypassphrase'
         );
@@ -25,7 +25,7 @@ class UplinkTest extends TestCase
     {
         $uplink = Uplink::create();
         $access = $uplink->requestAccessWithPassphrase(
-            getenv('SATTELITE_ADDRESS'),
+            getenv('SATELLITE_ADDRESS'),
             getenv('API_KEY'),
             'mypassphrase'
         );
@@ -38,7 +38,7 @@ class UplinkTest extends TestCase
     public function testAccessWithConfig(): void
     {
         $access = Uplink::create()->requestAccessWithPassphrase(
-            getenv('SATTELITE_ADDRESS'),
+            getenv('SATELLITE_ADDRESS'),
             getenv('API_KEY'),
             'mypassphrase',
             new Config()
@@ -52,7 +52,7 @@ class UplinkTest extends TestCase
         $this->expectException(UplinkException::class);
 
         $access = Uplink::create()->requestAccessWithPassphrase(
-            getenv('SATTELITE_ADDRESS'),
+            getenv('SATELLITE_ADDRESS'),
             getenv('API_KEY'),
             'mypassphrase',
             (new Config())->withDialTimeoutMilliseconds(1)
