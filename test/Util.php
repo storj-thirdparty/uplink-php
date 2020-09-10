@@ -15,7 +15,7 @@ class Util
 
     private static ?Project $project = null;
 
-    private static function getSatelliteAddress(): string
+    public static function getSatelliteAddress(): string
     {
         if (getenv('SATELLITE_ADDRESS')) {
             return getenv('SATELLITE_ADDRESS');

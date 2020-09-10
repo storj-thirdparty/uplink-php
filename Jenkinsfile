@@ -50,7 +50,7 @@ pipeline {
         stage('PHPUnit') {
             agent {
                 docker {
-                    label 'main'
+                    // there is a permission error when building from a local Dockerfile
                     image docker.build("phpunit-storj", "--pull https://github.com/storj-thirdparty/uplink-php.git#jenkins").id
                     args '--user root:root '
                 }
@@ -58,15 +58,11 @@ pipeline {
             steps {
                 unstash "vendor"
                 unstash "build"
-                sh '''
-                    ## API key is hardcoded in storj-sim
-                    export API_KEY=13YqgH45XZLg7nm6KsQ72QgXfjbDu2uhTaeSdMVP2A85QuANthM9K58ww5Y4nhMowrZDoqdA4Kyqt1ioQghQcm9fT5uR2drPHpFEqeb
-                    && export PATH="/root/go/bin:$PATH"
-                    && service postgresql start
-                    && su -s /bin/bash -c "psql -U postgres -c 'create database teststorj;'" postgres
-                    && storj-sim network setup --postgres=postgres://postgres@localhost/teststorj?sslmode=disable
-                    && storj-sim network test ./vendor/bin/phpunit test/
-                '''.replaceAll("\\s", ' ')
+                sh 'service postgresql start'
+                sh '''su -s /bin/bash -c "psql -U postgres -c 'create database teststorj;'" postgres'''
+                sh 'PATH="/root/go/bin:$PATH" && storj-sim network setup --postgres=postgres://postgres@localhost/teststorj?sslmode=disable'
+                // API key was extracted from ~/.local/share/storj/local-network/gateway/0/config.yaml
+                sh 'PATH="/root/go/bin:$PATH" && export API_KEY=13YqdpzzbRKj1utBamtaqNQiELrztNu7ALarnFDQvnFge9N38zG9ZwyUcthXbdtVErACDfVHJCAHCzyJMdhwJCtw4PBgjMtpTTenzJ6 && storj-sim network test ./vendor/bin/phpunit test/'
             }
         }
     }
