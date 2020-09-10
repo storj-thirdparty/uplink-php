@@ -2,6 +2,7 @@
 
 namespace Storj\Uplink\Test;
 
+use RuntimeException;
 use Storj\Uplink\Access;
 use Storj\Uplink\Exception\Bucket\BucketNotEmpty;
 use Storj\Uplink\ListObjectsOptions;
@@ -14,11 +15,25 @@ class Util
 
     private static ?Project $project = null;
 
+    private static function getSatelliteAddress(): string
+    {
+        if (getenv('SATELLITE_ADDRESS')) {
+            return getenv('SATELLITE_ADDRESS');
+        }
+
+        // exported by storj-sim
+        if (getenv('SATELLITE_0_ID') && getenv('SATELLITE_0_ADDR')) {
+            return getenv('SATELLITE_0_ID') . '@' . getenv('SATELLITE_0_ADDR');
+        }
+
+        throw new RuntimeException('SATELLITE_ADDRESS not set');
+    }
+
     public static function access(): Access
     {
         if (!self::$access) {
             self::$access = Uplink::create()->requestAccessWithPassphrase(
-                getenv('SATELLITE_ADDRESS'),
+                self::getSatelliteAddress(),
                 getenv('API_KEY'),
                 'mypassphrase'
             );
