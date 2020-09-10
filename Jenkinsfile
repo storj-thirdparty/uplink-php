@@ -49,9 +49,10 @@ pipeline {
         }
         stage('PHPUnit') {
             agent {
-                dockerfile {
+                docker {
                     label 'main'
-                    args '--user root:root root:root '
+                    image docker.build("phpunit-storj", "--pull https://github.com/storj-thirdparty/uplink-php.git#jenkins").id
+                    args '--user root:root '
                 }
             }
             steps {
