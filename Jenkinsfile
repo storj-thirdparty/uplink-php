@@ -8,14 +8,13 @@ pipeline {
         stage('Go build') {
             agent {
                 docker {
-                    label 'main'
+                    alwaysPull true
                     image docker.build("storj-ci", "--pull https://github.com/storj/ci.git").id
-                    args '--user root:root --cap-add SYS_PTRACE -v "/tmp/gomod":/go/pkg/mod '
+                    args '--cap-add SYS_PTRACE -v "/tmp/gomod":/go/pkg/mod '
                 }
             }
             steps {
                 script {
-                    sh 'rm -rf tmp-c' // should have been cleaned up...
                     sh './build.sh'
                     stash(name: "build", includes: "build/")
                 }
@@ -38,7 +37,7 @@ pipeline {
                 docker {
                     image 'phpstan/phpstan:0.12.33'
                     args '--mount type=volume,source=phpstan-cache,destination=/tmp/phpstan ' +
-                        '-u root:root ' +
+//                         '-u root:root ' +
                         "--entrypoint='' "
                 }
             }
@@ -52,7 +51,7 @@ pipeline {
                 docker {
                     // there is a permission error when building from a local Dockerfile
                     image docker.build("phpunit-storj", "--pull https://github.com/storj-thirdparty/uplink-php.git#jenkins").id
-                    args '--user root:root '
+//                     args '--user root:root '
                 }
             }
             steps {
@@ -61,8 +60,8 @@ pipeline {
                 sh 'service postgresql start'
                 sh '''su -s /bin/bash -c "psql -U postgres -c 'create database teststorj;'" postgres'''
                 sh 'PATH="/root/go/bin:$PATH" && storj-sim network setup --postgres=postgres://postgres@localhost/teststorj?sslmode=disable'
-                // API key was extracted from ~/.local/share/storj/local-network/gateway/0/config.yaml
-                sh 'PATH="/root/go/bin:$PATH" && export API_KEY=13YqdpzzbRKj1utBamtaqNQiELrztNu7ALarnFDQvnFge9N38zG9ZwyUcthXbdtVErACDfVHJCAHCzyJMdhwJCtw4PBgjMtpTTenzJ6 && storj-sim network test ./vendor/bin/phpunit test/'
+                sh 'PATH="/root/go/bin:$PATH" && storj-sim network test printenv'
+//                sh 'PATH="/root/go/bin:$PATH" && storj-sim network test ./vendor/bin/phpunit test/'
             }
         }
     }

@@ -13,6 +13,8 @@ RUN rm /etc/postgresql/11/main/pg_hba.conf; \
     	echo 'host    all             all             ::1/128                 trust' >> /etc/postgresql/11/main/pg_hba.conf; \
     	echo 'host    all             all             ::0/0                   trust' >> /etc/postgresql/11/main/pg_hba.conf;
 
-RUN git clone https://github.com/storj/storj.git /storj \
+## change when merged
+#RUN git clone https://github.com/storj/storj.git /storj \
+RUN git clone https://github.com/erikvv/storj.git /storj \
     && cd /storj \
     && make install-sim
