@@ -8,14 +8,14 @@ pipeline {
         stage('Go build') {
             agent {
                 docker {
-                    label 'main'
                     image docker.build("storj-ci", "--pull https://github.com/storj/ci.git").id
                     args '--user root:root --cap-add SYS_PTRACE -v "/tmp/gomod":/go/pkg/mod '
                 }
             }
             steps {
                 script {
-                    sh 'rm -rf tmp-c' // should have been cleaned up...
+                    // No clue why I need to keep deleting this directory
+                    sh 'rm -rf tmp-c'
                     sh './build.sh'
                     stash(name: "build", includes: "build/")
                 }
@@ -61,8 +61,8 @@ pipeline {
                 sh 'service postgresql start'
                 sh '''su -s /bin/bash -c "psql -U postgres -c 'create database teststorj;'" postgres'''
                 sh 'PATH="/root/go/bin:$PATH" && storj-sim network setup --postgres=postgres://postgres@localhost/teststorj?sslmode=disable'
-                // API key was extracted from ~/.local/share/storj/local-network/gateway/0/config.yaml
-                sh 'PATH="/root/go/bin:$PATH" && export API_KEY=13YqdpzzbRKj1utBamtaqNQiELrztNu7ALarnFDQvnFge9N38zG9ZwyUcthXbdtVErACDfVHJCAHCzyJMdhwJCtw4PBgjMtpTTenzJ6 && storj-sim network test ./vendor/bin/phpunit test/'
+                // see https://github.com/storj/storj/wiki/Test-network#running-tests
+                sh 'PATH="/root/go/bin:$PATH" && storj-sim network test ./vendor/bin/phpunit test/'
             }
         }
     }

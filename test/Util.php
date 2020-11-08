@@ -34,7 +34,7 @@ class Util
         if (!self::$access) {
             self::$access = Uplink::create()->requestAccessWithPassphrase(
                 self::getSatelliteAddress(),
-                getenv('API_KEY'),
+                getenv('GATEWAY_0_API_KEY'),
                 'mypassphrase'
             );
         }
