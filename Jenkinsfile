@@ -14,7 +14,7 @@ pipeline {
             }
             steps {
                 script {
-                    // No clue why I need to keep deleting this directory
+                    // need to keep deleting this directory because of some cleanup issue
                     sh 'rm -rf tmp-c'
                     sh './build.sh'
                     stash(name: "build", includes: "build/")
@@ -50,8 +50,7 @@ pipeline {
         stage('PHPUnit') {
             agent {
                 docker {
-                    // there is a permission error when building from a local Dockerfile
-                    image docker.build("phpunit-storj", "--pull https://github.com/storj-thirdparty/uplink-php.git#jenkins").id
+                    image docker.build("phpunit-storj").id
                     args '--user root:root '
                 }
             }
@@ -69,8 +68,6 @@ pipeline {
     post {
         always {
             node(null) {
-                sh "chmod -R 777 ."
-                deleteDir()
                 cleanWs()
             }
         }
