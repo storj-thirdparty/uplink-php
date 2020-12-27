@@ -20,7 +20,7 @@ class Project
     private FFI $ffi;
 
     /**
-     * The associated C struct of type Project
+     * The associated C struct of type UplinkProject
      */
     private CData $cProject;
 
@@ -46,12 +46,12 @@ class Project
      */
     public function statBucket(string $bucketName): BucketInfo
     {
-        $bucketResult = $this->ffi->stat_bucket($this->cProject, $bucketName);
-        $scope = Scope::exit(fn() => $this->ffi->free_bucket_result($bucketResult));
+        $bucketResult = $this->ffi->uplink_stat_bucket($this->cProject, $bucketName);
+        $scope = Scope::exit(fn() => $this->ffi->uplink_free_bucket_result($bucketResult));
 
         Util::throwIfErrorResult($bucketResult);
 
-        $bucketType = $this->ffi->type('Bucket');
+        $bucketType = $this->ffi->type('UplinkBucket');
         $cBucket = $this->ffi->cast($bucketType, $bucketResult->bucket[0]);
 
         return new BucketInfo($cBucket);
@@ -63,12 +63,12 @@ class Project
      */
     public function createBucket(string $bucketName): BucketInfo
     {
-        $bucketResult = $this->ffi->create_bucket($this->cProject, $bucketName);
-        $scope = Scope::exit(fn() => $this->ffi->free_bucket_result($bucketResult));
+        $bucketResult = $this->ffi->uplink_create_bucket($this->cProject, $bucketName);
+        $scope = Scope::exit(fn() => $this->ffi->uplink_free_bucket_result($bucketResult));
 
         Util::throwIfErrorResult($bucketResult);
 
-        $bucketType = $this->ffi->type('Bucket');
+        $bucketType = $this->ffi->type('UplinkBucket');
         $cBucket = $this->ffi->cast($bucketType, $bucketResult->bucket[0]);
 
         return new BucketInfo($cBucket);
@@ -81,12 +81,12 @@ class Project
      */
     public function ensureBucket(string $bucketName): BucketInfo
     {
-        $bucketResult = $this->ffi->ensure_bucket($this->cProject, $bucketName);
-        $scope = Scope::exit(fn() => $this->ffi->free_bucket_result($bucketResult));
+        $bucketResult = $this->ffi->uplink_ensure_bucket($this->cProject, $bucketName);
+        $scope = Scope::exit(fn() => $this->ffi->uplink_free_bucket_result($bucketResult));
 
         Util::throwIfErrorResult($bucketResult);
 
-        $bucketType = $this->ffi->type('Bucket');
+        $bucketType = $this->ffi->type('UplinkBucket');
         $cBucket = $this->ffi->cast($bucketType, $bucketResult->bucket[0]);
 
         return new BucketInfo($cBucket);
@@ -98,12 +98,28 @@ class Project
      */
     public function deleteBucket(string $bucketName): BucketInfo
     {
-        $bucketResult = $this->ffi->delete_bucket($this->cProject, $bucketName);
-        $scope = Scope::exit(fn() => $this->ffi->free_bucket_result($bucketResult));
+        $bucketResult = $this->ffi->uplink_delete_bucket($this->cProject, $bucketName);
+        $scope = Scope::exit(fn() => $this->ffi->uplink_free_bucket_result($bucketResult));
 
         Util::throwIfErrorResult($bucketResult);
 
-        $bucketType = $this->ffi->type('Bucket');
+        $bucketType = $this->ffi->type('UplinkBucket');
+        $cBucket = $this->ffi->cast($bucketType, $bucketResult->bucket[0]);
+
+        return new BucketInfo($cBucket);
+    }
+
+    /**
+     * @throws UplinkException
+     */
+    public function deleteBucketWithObjects(string $bucketName): BucketInfo
+    {
+        $bucketResult = $this->ffi->uplink_delete_bucket_with_objects($this->cProject, $bucketName);
+        $scope = Scope::exit(fn() => $this->ffi->uplink_free_bucket_result($bucketResult));
+
+        Util::throwIfErrorResult($bucketResult);
+
+        $bucketType = $this->ffi->type('UplinkBucket');
         $cBucket = $this->ffi->cast($bucketType, $bucketResult->bucket[0]);
 
         return new BucketInfo($cBucket);
@@ -117,26 +133,26 @@ class Project
     public function listBuckets(?string $cursor = null): Generator
     {
         $scope = new Scope();
-        $listBucketOptions = $this->ffi->new('ListBucketsOptions');
+        $listBucketOptions = $this->ffi->new('UplinkListBucketsOptions');
         if ($cursor) {
             $pChar = Util::createCString($cursor, $scope);
 
             $listBucketOptions->cursor = $pChar;
         }
 
-        $pBucketIterator = $this->ffi->list_buckets($this->cProject, FFI::addr($listBucketOptions));
-        $scope->onExit(fn() => $this->ffi->free_bucket_iterator($pBucketIterator));
+        $pBucketIterator = $this->ffi->uplink_list_buckets($this->cProject, FFI::addr($listBucketOptions));
+        $scope->onExit(fn() => $this->ffi->uplink_free_bucket_iterator($pBucketIterator));
 
-        while ($this->ffi->bucket_iterator_next($pBucketIterator)) {
-            $pBucket = $this->ffi->bucket_iterator_item($pBucketIterator);
-            $innerScope = Scope::exit(fn() => $this->ffi->free_bucket($pBucket));
+        while ($this->ffi->uplink_bucket_iterator_next($pBucketIterator)) {
+            $pBucket = $this->ffi->uplink_bucket_iterator_item($pBucketIterator);
+            $innerScope = Scope::exit(fn() => $this->ffi->uplink_free_bucket($pBucket));
 
             yield new BucketInfo($pBucket[0]);
         }
 
         // how to trigger this?
-        $pError = $this->ffi->bucket_iterator_err($pBucketIterator);
-        $scope->onExit(fn() => $this->ffi->free_error($pError));
+        $pError = $this->ffi->uplink_bucket_iterator_err($pBucketIterator);
+        $scope->onExit(fn() => $this->ffi->uplink_free_error($pError));
 
         Util::throwIfError($pError);
     }
@@ -154,19 +170,28 @@ class Project
             $pDownloadOptions = FFI::addr($cDownloadOptions);
         }
 
-        $downloadResult = $this->ffi->download_object(
+        $downloadResult = $this->ffi->uplink_download_object(
             $this->cProject,
             $bucketName,
             $objectKey,
             $pDownloadOptions
         );
-        $scope = Scope::exit(fn() => $this->ffi->free_download_result($downloadResult));
+        $scope = Scope::exit(fn() => $this->ffi->uplink_free_download_result($downloadResult));
 
         Util::throwIfErrorResult($downloadResult);
 
+        $cDownload = $downloadResult->download;
+
+        $scope->onExit(
+            function() use ($cDownload): void {
+                $pError = $this->ffi->uplink_close_download($cDownload);
+                Util::throwIfError($pError);
+            }
+        );
+
         return new Download(
             $this->ffi,
-            $downloadResult->download,
+            $cDownload,
             $scope
         );
     }
@@ -180,12 +205,12 @@ class Project
     {
         $uploadOptions = null;
         if ($expires) {
-            $uploadOptions = $this->ffi->new('UploadOptions');
+            $uploadOptions = $this->ffi->new('UplinkUploadOptions');
             $uploadOptions->expires = $expires->format('U');
         }
 
-        $uploadResult = $this->ffi->upload_object($this->cProject, $bucketName, $objectKey, $uploadOptions);
-        $scope = Scope::exit(fn() => $this->ffi->free_upload_result($uploadResult));
+        $uploadResult = $this->ffi->uplink_upload_object($this->cProject, $bucketName, $objectKey, $uploadOptions);
+        $scope = Scope::exit(fn() => $this->ffi->uplink_free_upload_result($uploadResult));
 
         Util::throwIfErrorResult($uploadResult);
 
@@ -197,8 +222,8 @@ class Project
      */
     public function deleteObject(string $bucketName, string $objectKey): ObjectInfo
     {
-        $objectResult = $this->ffi->delete_object($this->cProject, $bucketName, $objectKey);
-        $scope = Scope::exit(fn() => $this->ffi->free_object_result($objectResult));
+        $objectResult = $this->ffi->uplink_delete_object($this->cProject, $bucketName, $objectKey);
+        $scope = Scope::exit(fn() => $this->ffi->uplink_free_object_result($objectResult));
 
         Util::throwIfErrorResult($objectResult);
 
@@ -220,12 +245,12 @@ class Project
         $cListObjectOptions = $listObjectsOptions->toCStruct($this->ffi, $scope);
         $pListObjectOptions = FFI::addr($cListObjectOptions);
 
-        $pObjectIterator = $this->ffi->list_objects($this->cProject, $bucketName, $pListObjectOptions);
-        $scope->onExit(fn() => $this->ffi->free_object_iterator($pObjectIterator));
+        $pObjectIterator = $this->ffi->uplink_list_objects($this->cProject, $bucketName, $pListObjectOptions);
+        $scope->onExit(fn() => $this->ffi->uplink_free_object_iterator($pObjectIterator));
 
-        while($this->ffi->object_iterator_next($pObjectIterator)) {
-            $pObject = $this->ffi->object_iterator_item($pObjectIterator);
-            $innerScope = Scope::exit(fn() => $this->ffi->free_object($pObject));
+        while($this->ffi->uplink_object_iterator_next($pObjectIterator)) {
+            $pObject = $this->ffi->uplink_object_iterator_item($pObjectIterator);
+            $innerScope = Scope::exit(fn() => $this->ffi->uplink_free_object($pObject));
 
             // Why do we do [0] here but not when dereferencing ObjectResult::object?
             yield new ObjectInfo(
@@ -235,8 +260,8 @@ class Project
             );
         }
 
-        $pError = $this->ffi->object_iterator_err($pObjectIterator);
-        $scope->onExit(fn() => $this->ffi->free_error($pError));
+        $pError = $this->ffi->uplink_object_iterator_err($pObjectIterator);
+        $scope->onExit(fn() => $this->ffi->uplink_free_error($pError));
 
         Util::throwIfError($pError);
     }

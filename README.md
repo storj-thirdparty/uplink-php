@@ -40,7 +40,7 @@ For better response times of your web app, you should serialize your credentials
 ```php
 require 'vendor/autoload.php';
 $access = \Storj\Uplink\Uplink::create()->requestAccessWithPassphrase(
-    'europe-west-1.tardigrade.io:7777',
+    '12L9ZFwhzVpuEKMUNUqkaTLGzwY9G24tbiigLiXpmZWKwmcNDDs@europe-west-1.tardigrade.io:7777',
     'mybase58apikey',
     'mypassphrase'
 );

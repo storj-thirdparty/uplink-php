@@ -8,95 +8,107 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct Handle {
-    size_t _handle;
-} Handle;
+#include "uplink_compat.h"
 
-typedef struct Access {
-    size_t _handle;
-} Access;
-typedef struct Project {
-    size_t _handle;
-} Project;
-typedef struct Download {
-    size_t _handle;
-} Download;
-typedef struct Upload {
-    size_t _handle;
-} Upload;
+typedef const char uplink_const_char;
 
-typedef struct Config {
-    char *user_agent;
+typedef struct UplinkHandle {
+    size_t _handle;
+} UplinkHandle;
+
+typedef struct UplinkAccess {
+    size_t _handle;
+} UplinkAccess;
+
+typedef struct UplinkProject {
+    size_t _handle;
+} UplinkProject;
+
+typedef struct UplinkDownload {
+    size_t _handle;
+} UplinkDownload;
+
+typedef struct UplinkUpload {
+    size_t _handle;
+} UplinkUpload;
+
+typedef struct UplinkEncryptionKey {
+    size_t _handle;
+} UplinkEncryptionKey;
+
+typedef struct UplinkConfig {
+    const char *user_agent;
 
     int32_t dial_timeout_milliseconds;
 
     // temp_directory specifies where to save data during downloads to use less memory.
-    char *temp_directory;
-} Config;
+    const char *temp_directory;
+} UplinkConfig;
 
-typedef struct Bucket {
+typedef struct UplinkBucket {
     char *name;
     int64_t created;
-} Bucket;
+} UplinkBucket;
 
-typedef struct SystemMetadata {
+typedef struct UplinkSystemMetadata {
     int64_t created;
     int64_t expires;
     int64_t content_length;
-} SystemMetadata;
+} UplinkSystemMetadata;
 
-typedef struct CustomMetadataEntry {
+typedef struct UplinkCustomMetadataEntry {
     char *key;
     size_t key_length;
 
     char *value;
     size_t value_length;
-} CustomMetadataEntry;
+} UplinkCustomMetadataEntry;
 
-typedef struct CustomMetadata {
-    CustomMetadataEntry *entries;
+typedef struct UplinkCustomMetadata {
+    UplinkCustomMetadataEntry *entries;
     size_t count;
-} CustomMetadata;
+} UplinkCustomMetadata;
 
-typedef struct Object {
+typedef struct UplinkObject {
     char *key;
     bool is_prefix;
-    SystemMetadata system;
-    CustomMetadata custom;
-} Object;
+    UplinkSystemMetadata system;
+    UplinkCustomMetadata custom;
+} UplinkObject;
 
-typedef struct UploadOptions {
+typedef struct UplinkUploadOptions {
     // When expires is 0 or negative, it means no expiration.
     int64_t expires;
-} UploadOptions;
+} UplinkUploadOptions;
 
-typedef struct DownloadOptions {
+typedef struct UplinkDownloadOptions {
     int64_t offset;
     // When length is negative, it will read until the end of the blob.
     int64_t length;
-} DownloadOptions;
+} UplinkDownloadOptions;
 
-typedef struct ListObjectsOptions {
-    char *prefix;
-    char *cursor;
+typedef struct UplinkListObjectsOptions {
+    const char *prefix;
+    const char *cursor;
     bool recursive;
 
     bool system;
     bool custom;
-} ListObjectsOptions;
+} UplinkListObjectsOptions;
 
-typedef struct ListBucketsOptions {
-    char *cursor;
-} ListBucketsOptions;
+typedef struct UplinkListBucketsOptions {
+    const char *cursor;
+} UplinkListBucketsOptions;
 
-typedef struct ObjectIterator {
+typedef struct UplinkObjectIterator {
     size_t _handle;
-} ObjectIterator;
-typedef struct BucketIterator {
-    size_t _handle;
-} BucketIterator;
+} UplinkObjectIterator;
 
-typedef struct Permission {
+typedef struct UplinkBucketIterator {
+    size_t _handle;
+} UplinkBucketIterator;
+
+typedef struct UplinkPermission {
     bool allow_download;
     bool allow_upload;
     bool allow_list;
@@ -108,78 +120,83 @@ typedef struct Permission {
     // unix time in seconds when the permission becomes invalid.
     // disabled when 0.
     int64_t not_after;
-} Permission;
+} UplinkPermission;
 
-typedef struct SharePrefix {
-    char *bucket;
+typedef struct UplinkSharePrefix {
+    const char *bucket;
     // prefix is the prefix of the shared object keys.
-    char *prefix;
-} SharePrefix;
+    const char *prefix;
+} UplinkSharePrefix;
 
-typedef struct Error {
+typedef struct UplinkError {
     int32_t code;
     char *message;
-} Error;
+} UplinkError;
 
-#define ERROR_INTERNAL 0x02
-#define ERROR_CANCELED 0x03
-#define ERROR_INVALID_HANDLE 0x04
-#define ERROR_TOO_MANY_REQUESTS 0x05
-#define ERROR_BANDWIDTH_LIMIT_EXCEEDED 0x06
+#define UPLINK_ERROR_INTERNAL 0x02
+#define UPLINK_ERROR_CANCELED 0x03
+#define UPLINK_ERROR_INVALID_HANDLE 0x04
+#define UPLINK_ERROR_TOO_MANY_REQUESTS 0x05
+#define UPLINK_ERROR_BANDWIDTH_LIMIT_EXCEEDED 0x06
 
-#define ERROR_BUCKET_NAME_INVALID 0x10
-#define ERROR_BUCKET_ALREADY_EXISTS 0x11
-#define ERROR_BUCKET_NOT_EMPTY 0x12
-#define ERROR_BUCKET_NOT_FOUND 0x13
+#define UPLINK_ERROR_BUCKET_NAME_INVALID 0x10
+#define UPLINK_ERROR_BUCKET_ALREADY_EXISTS 0x11
+#define UPLINK_ERROR_BUCKET_NOT_EMPTY 0x12
+#define UPLINK_ERROR_BUCKET_NOT_FOUND 0x13
 
-#define ERROR_OBJECT_KEY_INVALID 0x20
-#define ERROR_OBJECT_NOT_FOUND 0x21
-#define ERROR_UPLOAD_DONE 0x22
+#define UPLINK_ERROR_OBJECT_KEY_INVALID 0x20
+#define UPLINK_ERROR_OBJECT_NOT_FOUND 0x21
+#define UPLINK_ERROR_UPLOAD_DONE 0x22
 
-typedef struct AccessResult {
-    Access *access;
-    Error *error;
-} AccessResult;
+typedef struct UplinkAccessResult {
+    UplinkAccess *access;
+    UplinkError *error;
+} UplinkAccessResult;
 
-typedef struct ProjectResult {
-    Project *project;
-    Error *error;
-} ProjectResult;
+typedef struct UplinkProjectResult {
+    UplinkProject *project;
+    UplinkError *error;
+} UplinkProjectResult;
 
-typedef struct BucketResult {
-    Bucket *bucket;
-    Error *error;
-} BucketResult;
+typedef struct UplinkBucketResult {
+    UplinkBucket *bucket;
+    UplinkError *error;
+} UplinkBucketResult;
 
-typedef struct ObjectResult {
-    Object *object;
-    Error *error;
-} ObjectResult;
+typedef struct UplinkObjectResult {
+    UplinkObject *object;
+    UplinkError *error;
+} UplinkObjectResult;
 
-typedef struct UploadResult {
-    Upload *upload;
-    Error *error;
-} UploadResult;
+typedef struct UplinkUploadResult {
+    UplinkUpload *upload;
+    UplinkError *error;
+} UplinkUploadResult;
 
-typedef struct DownloadResult {
-    Download *download;
-    Error *error;
-} DownloadResult;
+typedef struct UplinkDownloadResult {
+    UplinkDownload *download;
+    UplinkError *error;
+} UplinkDownloadResult;
 
-typedef struct WriteResult {
+typedef struct UplinkWriteResult {
     size_t bytes_written;
-    Error *error;
-} WriteResult;
+    UplinkError *error;
+} UplinkWriteResult;
 
-typedef struct ReadResult {
+typedef struct UplinkReadResult {
     size_t bytes_read;
-    Error *error;
-} ReadResult;
+    UplinkError *error;
+} UplinkReadResult;
 
-typedef struct StringResult {
+typedef struct UplinkStringResult {
     char *string;
-    Error *error;
-} StringResult;
+    UplinkError *error;
+} UplinkStringResult;
+
+typedef struct UplinkEncryptionKeyResult {
+    UplinkEncryptionKey *encryption_key;
+    UplinkError *error;
+} UplinkEncryptionKeyResult;
 /* Code generated by cmd/cgo; DO NOT EDIT. */
 
 /* package storj.io/uplink-c */
@@ -226,12 +243,18 @@ typedef struct { const char *p; ptrdiff_t n; } _GoString_;
 
 #line 1 "cgo-generated-wrapper"
 
+#line 6 "encryption.go"
+ #include "uplink_definitions.h"
+
+#line 1 "cgo-generated-wrapper"
+
 #line 6 "error.go"
  #include "uplink_definitions.h"
 
 #line 1 "cgo-generated-wrapper"
 
 #line 6 "main.go"
+
  #include "uplink_definitions.h"
 
 #line 1 "cgo-generated-wrapper"
@@ -305,160 +328,185 @@ typedef struct { void *data; GoInt len; GoInt cap; } GoSlice;
 
 
 
-// parse_access parses serialized access grant string.
-extern AccessResult parse_access(char* accessString);
+// uplink_parse_access parses serialized access grant string.
+extern UplinkAccessResult uplink_parse_access(uplink_const_char* accessString);
 
-// request_access_with_passphrase requests satellite for a new access grant using a passhprase.
-extern AccessResult request_access_with_passphrase(char* satellite_address, char* api_key, char* passphrase);
+// uplink_request_access_with_passphrase requests satellite for a new access grant using a passhprase.
+extern UplinkAccessResult uplink_request_access_with_passphrase(uplink_const_char* satellite_address, uplink_const_char* api_key, uplink_const_char* passphrase);
 
-// access_serialize serializes access grant into a string.
-extern StringResult access_serialize(Access* access);
+// uplink_access_satellite_address returns the satellite node URL for this access grant.
+extern UplinkStringResult uplink_access_satellite_address(UplinkAccess* access);
 
-// access_share creates new access grant with specific permission. Permission will be applied to prefixes when defined.
-extern AccessResult access_share(Access* access, Permission permission, SharePrefix* prefixes, GoInt prefixes_count);
+// uplink_access_serialize serializes access grant into a string.
+extern UplinkStringResult uplink_access_serialize(UplinkAccess* access);
 
-// free_string_result frees the resources associated with string result.
-extern void free_string_result(StringResult result);
+// uplink_access_share creates new access grant with specific permission. Permission will be applied to prefixes when defined.
+extern UplinkAccessResult uplink_access_share(UplinkAccess* access, UplinkPermission permission, UplinkSharePrefix* prefixes, GoInt prefixes_count);
 
-// free_access_result frees the resources associated with access grant.
-extern void free_access_result(AccessResult result);
+// uplink_access_override_encryption_key overrides the root encryption key for the prefix in
+// bucket with encryptionKey.
+//
+// This function is useful for overriding the encryption key in user-specific
+// access grants when implementing multitenancy in a single app bucket.
+extern UplinkError* uplink_access_override_encryption_key(UplinkAccess* access, uplink_const_char* bucket, uplink_const_char* prefix, UplinkEncryptionKey* encryptionKey);
 
-// stat_bucket returns information about a bucket.
-extern BucketResult stat_bucket(Project* project, char* bucket_name);
+// uplink_free_string_result frees the resources associated with string result.
+extern void uplink_free_string_result(UplinkStringResult result);
 
-// create_bucket creates a new bucket.
+// uplink_free_access_result frees the resources associated with access grant.
+extern void uplink_free_access_result(UplinkAccessResult result);
+
+// uplink_stat_bucket returns information about a bucket.
+extern UplinkBucketResult uplink_stat_bucket(UplinkProject* project, uplink_const_char* bucket_name);
+
+// uplink_create_bucket creates a new bucket.
 //
 // When bucket already exists it returns a valid Bucket and ErrBucketExists.
-extern BucketResult create_bucket(Project* project, char* bucket_name);
+extern UplinkBucketResult uplink_create_bucket(UplinkProject* project, uplink_const_char* bucket_name);
 
-// ensure_bucket creates a new bucket and ignores the error when it already exists.
+// uplink_ensure_bucket creates a new bucket and ignores the error when it already exists.
 //
 // When bucket already exists it returns a valid Bucket and ErrBucketExists.
-extern BucketResult ensure_bucket(Project* project, char* bucket_name);
+extern UplinkBucketResult uplink_ensure_bucket(UplinkProject* project, uplink_const_char* bucket_name);
 
-// delete_bucket deletes a bucket.
+// uplink_delete_bucket deletes a bucket.
 //
 // When bucket is not empty it returns ErrBucketNotEmpty.
-extern BucketResult delete_bucket(Project* project, char* bucket_name);
+extern UplinkBucketResult uplink_delete_bucket(UplinkProject* project, uplink_const_char* bucket_name);
 
-// free_bucket_result frees memory associated with the BucketResult.
-extern void free_bucket_result(BucketResult result);
+// uplink_delete_bucket_with_objects deletes a bucket and all objects within that bucket.
+//
+// When there are concurrent writes to the bucket it returns ErrBucketNotEmpty.
+extern UplinkBucketResult uplink_delete_bucket_with_objects(UplinkProject* project, uplink_const_char* bucket_name);
 
-// free_bucket frees memory associated with the bucket.
-extern void free_bucket(Bucket* bucket);
+// uplink_free_bucket_result frees memory associated with the BucketResult.
+extern void uplink_free_bucket_result(UplinkBucketResult result);
 
-// list_buckets lists buckets
-extern BucketIterator* list_buckets(Project* project, ListBucketsOptions* options);
+// uplink_free_bucket frees memory associated with the bucket.
+extern void uplink_free_bucket(UplinkBucket* bucket);
 
-// bucket_iterator_next prepares next Bucket for reading.
+// uplink_list_buckets lists buckets.
+extern UplinkBucketIterator* uplink_list_buckets(UplinkProject* project, UplinkListBucketsOptions* options);
+
+// uplink_bucket_iterator_next prepares next Bucket for reading.
 //
 // It returns false if the end of the iteration is reached and there are no more buckets, or if there is an error.
-extern _Bool bucket_iterator_next(BucketIterator* iterator);
+extern _Bool uplink_bucket_iterator_next(UplinkBucketIterator* iterator);
 
-// bucket_iterator_err returns error, if one happened during iteration.
-extern Error* bucket_iterator_err(BucketIterator* iterator);
+// uplink_bucket_iterator_err returns error, if one happened during iteration.
+extern UplinkError* uplink_bucket_iterator_err(UplinkBucketIterator* iterator);
 
-// bucket_iterator_item returns the current bucket in the iterator.
-extern Bucket* bucket_iterator_item(BucketIterator* iterator);
+// uplink_bucket_iterator_item returns the current bucket in the iterator.
+extern UplinkBucket* uplink_bucket_iterator_item(UplinkBucketIterator* iterator);
 
-// free_bucket_iterator frees memory associated with the BucketIterator.
-extern void free_bucket_iterator(BucketIterator* iterator);
+// uplink_free_bucket_iterator frees memory associated with the BucketIterator.
+extern void uplink_free_bucket_iterator(UplinkBucketIterator* iterator);
 
-// config_request_access_with_passphrase requests satellite for a new access grant using a passhprase.
-extern AccessResult config_request_access_with_passphrase(Config config, char* satellite_address, char* api_key, char* passphrase);
+// uplink_config_request_access_with_passphrase requests satellite for a new access grant using a passhprase.
+extern UplinkAccessResult uplink_config_request_access_with_passphrase(UplinkConfig config, uplink_const_char* satellite_address, uplink_const_char* api_key, uplink_const_char* passphrase);
 
-// config_open_project opens project using access grant.
-extern ProjectResult config_open_project(Config config, Access* access);
+// uplink_config_open_project opens project using access grant.
+extern UplinkProjectResult uplink_config_open_project(UplinkConfig config, UplinkAccess* access);
 
-// download_object starts  download to the specified key.
-extern DownloadResult download_object(Project* project, char* bucket_name, char* object_key, DownloadOptions* options);
+// uplink_download_object starts  download to the specified key.
+extern UplinkDownloadResult uplink_download_object(UplinkProject* project, uplink_const_char* bucket_name, uplink_const_char* object_key, UplinkDownloadOptions* options);
 
-// download_read downloads from object's data stream into bytes up to length amount.
+// uplink_download_read downloads from object's data stream into bytes up to length amount.
 // It returns the number of bytes read (0 <= bytes_read <= length) and
 // any error encountered that caused the read to stop early.
-extern ReadResult download_read(Download* download, void* bytes, size_t length);
+extern UplinkReadResult uplink_download_read(UplinkDownload* download, void* bytes, size_t length);
 
-// download_info returns information about the downloaded object.
-extern ObjectResult download_info(Download* download);
+// uplink_download_info returns information about the downloaded object.
+extern UplinkObjectResult uplink_download_info(UplinkDownload* download);
 
-// free_read_result frees any resources associated with read result.
-extern void free_read_result(ReadResult result);
+// uplink_free_read_result frees any resources associated with read result.
+extern void uplink_free_read_result(UplinkReadResult result);
 
-// close_download closes the download.
-extern Error* close_download(Download* download);
+// uplink_close_download closes the download.
+extern UplinkError* uplink_close_download(UplinkDownload* download);
 
-// free_download_result frees any associated resources.
-extern void free_download_result(DownloadResult result);
+// uplink_free_download_result frees any associated resources.
+extern void uplink_free_download_result(UplinkDownloadResult result);
 
-// free_error frees error data.
-extern void free_error(Error* err);
+// uplink_derive_encryption_key derives a salted encryption key for passphrase using the
+// salt.
+//
+// This function is useful for deriving a salted encryption key for users when
+// implementing multitenancy in a single app bucket.
+extern UplinkEncryptionKeyResult uplink_derive_encryption_key(uplink_const_char* passphrase, void* salt, size_t length);
 
-// internal_UniverseIsEmpty returns true if nothing is stored in the global map.
-extern GoUint8 internal_UniverseIsEmpty();
+// uplink_free_encryption_key_result frees the resources associated with encryption key.
+extern void uplink_free_encryption_key_result(UplinkEncryptionKeyResult result);
 
-// stat_object returns information about an object at the specific key.
-extern ObjectResult stat_object(Project* project, char* bucket_name, char* object_key);
+// uplink_free_error frees error data.
+extern void uplink_free_error(UplinkError* err);
 
-// delete_object deletes an object.
-extern ObjectResult delete_object(Project* project, char* bucket_name, char* object_key);
+// uplink_internal_UniverseIsEmpty returns true if nothing is stored in the global map.
+extern GoUint8 uplink_internal_UniverseIsEmpty();
 
-// free_object_result frees memory associated with the ObjectResult.
-extern void free_object_result(ObjectResult obj);
+// uplink_stat_object returns information about an object at the specific key.
+extern UplinkObjectResult uplink_stat_object(UplinkProject* project, uplink_const_char* bucket_name, uplink_const_char* object_key);
 
-// free_object frees memory associated with the Object.
-extern void free_object(Object* obj);
+// uplink_delete_object deletes an object.
+extern UplinkObjectResult uplink_delete_object(UplinkProject* project, uplink_const_char* bucket_name, uplink_const_char* object_key);
 
-// list_objects lists objects
-extern ObjectIterator* list_objects(Project* project, char* bucket_name, ListObjectsOptions* options);
+// uplink_free_object_result frees memory associated with the ObjectResult.
+extern void uplink_free_object_result(UplinkObjectResult obj);
 
-// object_iterator_next prepares next Object for reading.
+// uplink_free_object frees memory associated with the Object.
+extern void uplink_free_object(UplinkObject* obj);
+
+// uplink_list_objects lists objects.
+extern UplinkObjectIterator* uplink_list_objects(UplinkProject* project, uplink_const_char* bucket_name, UplinkListObjectsOptions* options);
+
+// uplink_object_iterator_next prepares next Object for reading.
 //
 // It returns false if the end of the iteration is reached and there are no more objects, or if there is an error.
-extern _Bool object_iterator_next(ObjectIterator* iterator);
+extern _Bool uplink_object_iterator_next(UplinkObjectIterator* iterator);
 
-// object_iterator_err returns error, if one happened during iteration.
-extern Error* object_iterator_err(ObjectIterator* iterator);
+// uplink_object_iterator_err returns error, if one happened during iteration.
+extern UplinkError* uplink_object_iterator_err(UplinkObjectIterator* iterator);
 
-// object_iterator_item returns the current object in the iterator.
-extern Object* object_iterator_item(ObjectIterator* iterator);
+// uplink_object_iterator_item returns the current object in the iterator.
+extern UplinkObject* uplink_object_iterator_item(UplinkObjectIterator* iterator);
 
-// free_object_iterator frees memory associated with the ObjectIterator.
-extern void free_object_iterator(ObjectIterator* iterator);
+// uplink_free_object_iterator frees memory associated with the ObjectIterator.
+extern void uplink_free_object_iterator(UplinkObjectIterator* iterator);
 
-// open_project opens project using access grant.
-extern ProjectResult open_project(Access* access);
+// uplink_open_project opens project using access grant.
+extern UplinkProjectResult uplink_open_project(UplinkAccess* access);
 
-// close_project closes the project.
-extern Error* close_project(Project* project);
+// uplink_close_project closes the project.
+extern UplinkError* uplink_close_project(UplinkProject* project);
 
-// free_project_result frees any associated resources.
-extern void free_project_result(ProjectResult result);
+// uplink_free_project_result frees any associated resources.
+extern void uplink_free_project_result(UplinkProjectResult result);
 
-// upload_object starts an upload to the specified key.
-extern UploadResult upload_object(Project* project, char* bucket_name, char* object_key, UploadOptions* options);
+// uplink_upload_object starts an upload to the specified key.
+extern UplinkUploadResult uplink_upload_object(UplinkProject* project, uplink_const_char* bucket_name, uplink_const_char* object_key, UplinkUploadOptions* options);
 
-// upload_write uploads len(p) bytes from p to the object's data stream.
+// uplink_upload_write uploads len(p) bytes from p to the object's data stream.
 // It returns the number of bytes written from p (0 <= n <= len(p)) and
 // any error encountered that caused the write to stop early.
-extern WriteResult upload_write(Upload* upload, void* bytes, size_t length);
+extern UplinkWriteResult uplink_upload_write(UplinkUpload* upload, void* bytes, size_t length);
 
-// upload_commit commits the uploaded data.
-extern Error* upload_commit(Upload* upload);
+// uplink_upload_commit commits the uploaded data.
+extern UplinkError* uplink_upload_commit(UplinkUpload* upload);
 
-// upload_abort aborts an upload.
-extern Error* upload_abort(Upload* upload);
+// uplink_upload_abort aborts an upload.
+extern UplinkError* uplink_upload_abort(UplinkUpload* upload);
 
-// upload_info returns the last information about the uploaded object.
-extern ObjectResult upload_info(Upload* upload);
+// uplink_upload_info returns the last information about the uploaded object.
+extern UplinkObjectResult uplink_upload_info(UplinkUpload* upload);
 
-// upload_set_custom_metadata returns the last information about the uploaded object.
-extern Error* upload_set_custom_metadata(Upload* upload, CustomMetadata custom);
+// uplink_upload_set_custom_metadata returns the last information about the uploaded object.
+extern UplinkError* uplink_upload_set_custom_metadata(UplinkUpload* upload, UplinkCustomMetadata custom);
 
-// free_write_result frees any resources associated with write result.
-extern void free_write_result(WriteResult result);
+// uplink_free_write_result frees any resources associated with write result.
+extern void uplink_free_write_result(UplinkWriteResult result);
 
-// free_upload_result closes the upload and frees any associated resources.
-extern void free_upload_result(UploadResult result);
+// uplink_free_upload_result closes the upload and frees any associated resources.
+extern void uplink_free_upload_result(UplinkUploadResult result);
 
 
 

@@ -58,7 +58,7 @@ class Config
         $cUserAgent = Util::createCString($this->userAgent, $scope);
         $cTempDirectory = Util::createCString($this->tempDirectory, $scope);
 
-        $cConfig = $ffi->new('Config');
+        $cConfig = $ffi->new('UplinkConfig');
         $cConfig->user_agent = $cUserAgent;
         $cConfig->dial_timeout_milliseconds = $this->dialTimeoutMilliseconds;
         $cConfig->temp_directory = $cTempDirectory;

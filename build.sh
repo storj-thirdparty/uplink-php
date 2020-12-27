@@ -1,12 +1,14 @@
 #!/bin/bash
 set -e
-mkdir -p tmp-c
-git clone --branch v1.0.5 https://github.com/storj/uplink-c.git tmp-c
+rm -rf tmp-c
+mkdir tmp-c
+git clone --branch v1.2.2 https://github.com/storj/uplink-c.git tmp-c
 cd tmp-c
-## prefer Go release 2.15 because it preserves parameter names in the header file
+## prefer Go release >=1.15 (aug-2020) because it preserves parameter names in the header file
 make build
 cd ..
-cat tmp-c/.build/uplink_definitions.h tmp-c/.build/uplink.h > build/uplink-php.h
+mkdir -p build
+cat tmp-c/.build/uplink/uplink_definitions.h tmp-c/.build/uplink/uplink.h > build/uplink-php.h
 cat tmp-c/.build/libuplink.so > build/libuplink.so
 ## remove stuff PHP can't handle
 sed -i 's/typedef __SIZE_TYPE__ GoUintptr;//g' build/uplink-php.h

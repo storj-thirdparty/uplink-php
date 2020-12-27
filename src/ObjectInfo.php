@@ -59,7 +59,7 @@ class ObjectInfo
     }
 
     /**
-     * @param CData $cCustomMetaData C struct of type CustomMetaData
+     * @param CData $cCustomMetaData C struct of type UplinkCustomMetaData
      * @return string[] hash map
      */
     private static function createCustomMetaDataFromCStruct(

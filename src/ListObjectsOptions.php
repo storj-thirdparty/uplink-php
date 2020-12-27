@@ -91,7 +91,7 @@ class ListObjectsOptions
      */
     public function toCStruct(FFI $ffi, Scope $scope): CData
     {
-        $cListObjectsOptions = $ffi->new('ListObjectsOptions');
+        $cListObjectsOptions = $ffi->new('UplinkListObjectsOptions');
 
         $cListObjectsOptions->prefix = Util::createCString($this->prefix, $scope);
         $cListObjectsOptions->cursor = Util::createCString($this->cursor, $scope);

@@ -1,7 +1,7 @@
 Automated testing
 -----
 
-Install dependencies using `composer install`, then set up an environment;
+Install dependencies using `composer install`, then set up an environment with your tardigrade credentials:
 
 ```
 #!/bin/bash

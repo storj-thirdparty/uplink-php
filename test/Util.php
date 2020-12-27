@@ -11,6 +11,8 @@ use Storj\Uplink\Uplink;
 
 class Util
 {
+    private static ?Uplink $uplink = null;
+
     private static ?Access $access = null;
 
     private static ?Project $project = null;
@@ -29,10 +31,19 @@ class Util
         throw new RuntimeException('SATELLITE_ADDRESS not set');
     }
 
-    public static function access(): Access
+    public static function uplink(): Uplink
     {
-        if (!self::$access) {
-            self::$access = Uplink::create()->requestAccessWithPassphrase(
+        if (!self::$uplink) {
+            self::$uplink = Uplink::create();
+        }
+
+        return self::$uplink;
+    }
+
+    public static function access(bool $renew = false): Access
+    {
+        if (!self::$access || $renew) {
+            self::$access = self::uplink()->requestAccessWithPassphrase(
                 self::getSatelliteAddress(),
                 getenv('GATEWAY_0_API_KEY'),
                 'mypassphrase'
@@ -67,20 +78,12 @@ class Util
         return self::$access;
     }
 
-    private static function wipeProject(Project $project): void
+    public static function wipeProject(Project $project): void
     {
         foreach ($project->listBuckets() as $bucket) {
             $bucketName = $bucket->getName();
 
-            foreach ($project->listObjects($bucketName, (new ListObjectsOptions())->withRecursive()) as $objectInfo) {
-                $project->deleteObject($bucketName, $objectInfo->getKey());
-            }
-
-            try {
-                $project->deleteBucket($bucket->getName());
-            } catch (BucketNotEmpty $e) {
-                // https://github.com/storj/storj/issues/3922
-            }
+            $project->deleteBucketWithObjects($bucketName);
         }
     }
 }

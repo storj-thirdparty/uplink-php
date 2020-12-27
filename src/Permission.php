@@ -140,7 +140,7 @@ class Permission
      */
     public function toCStruct(FFI $ffi): CData
     {
-        $cPermission = $ffi->new('Permission');
+        $cPermission = $ffi->new('UplinkPermission');
         $cPermission->allow_download = $this->allowDownload;
         $cPermission->allow_upload = $this->allowUpload;
         $cPermission->allow_list = $this->allowList;

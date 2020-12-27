@@ -29,5 +29,15 @@ class AccessTest extends TestCase
         $project = Util::access()->openProject(
             (new Config())->withDialTimeoutMilliseconds(1)
         );
+
+        $project->ensureBucket('asdfasdf');
+    }
+
+    public function testSatteliteAddress(): void
+    {
+        self::assertEquals(
+            Util::getSatelliteAddress(),
+            Util::access()->satteliteAddress()
+        );
     }
 }

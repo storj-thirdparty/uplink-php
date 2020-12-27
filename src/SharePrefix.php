@@ -47,7 +47,7 @@ class SharePrefix
     {
         $count = count($sharePrefixes);
 
-        $cSharePrefixesType = FFI::arrayType($ffi->type('SharePrefix'), [$count]);
+        $cSharePrefixesType = FFI::arrayType($ffi->type('UplinkSharePrefix'), [$count]);
         $cSharePrefixes = $ffi->new($cSharePrefixesType);
 
         foreach (Util::it($count) as $i) {

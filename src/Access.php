@@ -22,7 +22,7 @@ class Access
     private FFI $ffi;
 
     /**
-     * The associated C struct of type Access
+     * The associated C struct of type UplinkAccess
      */
     private CData $cAccess;
 
@@ -54,11 +54,11 @@ class Access
         $scope = new Scope();
         if ($config) {
             $cConfig = $config->toCStruct($this->ffi, $scope);
-            $projectResult = $this->ffi->config_open_project($cConfig, $this->cAccess);
+            $projectResult = $this->ffi->uplink_config_open_project($cConfig, $this->cAccess);
         } else {
-            $projectResult = $this->ffi->open_project($this->cAccess);
+            $projectResult = $this->ffi->uplink_open_project($this->cAccess);
         }
-        $scope->onExit(fn() => $this->ffi->free_project_result($projectResult));
+        $scope->onExit(fn() => $this->ffi->uplink_free_project_result($projectResult));
 
         Util::throwIfErrorResult($projectResult);
 
@@ -70,14 +70,29 @@ class Access
     }
 
     /**
+     * Return the satellite node URL for this access grant
+     *
+     * @throws UplinkException
+     */
+    public function satteliteAddress(): string
+    {
+        $stringResult = $this->ffi->uplink_access_satellite_address($this->cAccess);
+        $scope = Scope::exit(fn() => $this->ffi->uplink_free_string_result($stringResult));
+
+        Util::throwIfErrorResult($stringResult);
+
+        return FFI::string($stringResult->string);
+    }
+
+    /**
      * Create base58 encoded string for later use with @see Uplink::parseAccess() or other tools
      *
      * @throws UplinkException
      */
     public function serialize(): string
     {
-        $stringResult = $this->ffi->access_serialize($this->cAccess);
-        $scope = Scope::exit(fn() => $this->ffi->free_string_result($stringResult));
+        $stringResult = $this->ffi->uplink_access_serialize($this->cAccess);
+        $scope = Scope::exit(fn() => $this->ffi->uplink_free_string_result($stringResult));
 
         Util::throwIfErrorResult($stringResult);
 
@@ -106,8 +121,8 @@ class Access
         $cPermission = $permission->toCStruct($this->ffi);
         $cSharePrefixes = SharePrefix::toCStructArray($this->ffi, $sharePrefixes, $scope);
 
-        $accessResult = $this->ffi->access_share($this->cAccess, $cPermission, $cSharePrefixes, count($sharePrefixes));
-        $scope->onExit(fn() => $this->ffi->free_access_result($accessResult));
+        $accessResult = $this->ffi->uplink_access_share($this->cAccess, $cPermission, $cSharePrefixes, count($sharePrefixes));
+        $scope->onExit(fn() => $this->ffi->uplink_free_access_result($accessResult));
 
         Util::throwIfErrorResult($accessResult);
 
@@ -116,5 +131,28 @@ class Access
             $accessResult->access,
             $scope
         );
+    }
+
+    /**
+     * Override the root encryption key for the prefix in bucket with encryptionKey.
+     *
+     * This function is useful for overriding the encryption key in user-specific
+     * access grants when implementing multitenancy in a single app bucket.
+     *
+     * Looks like this mutates the underlying UplinkAccess struct
+     *
+     * @throws UplinkException
+     */
+    public function overrideEncryptionKey(string $bucket, string $prefix, EncryptionKey $encryptionKey): void
+    {
+        $pError = $this->ffi->uplink_access_override_encryption_key(
+            $this->cAccess,
+            $bucket,
+            $prefix,
+            $encryptionKey->getCStruct()
+        );
+
+        $scope = Scope::exit(fn() => $this->ffi->uplink_free_error($pError));
+        Util::throwIfError($pError);
     }
 }

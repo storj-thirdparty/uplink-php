@@ -8,7 +8,7 @@ pipeline {
         stage('Go build') {
             agent {
                 docker {
-                    image docker.build("storj-ci", "--pull https://github.com/storj/ci.git").id
+                    image docker.build("storj-ci", "--pull https://github.com/storj/ci.git#main").id
                     args '--user root:root --cap-add SYS_PTRACE -v "/tmp/gomod":/go/pkg/mod '
                 }
             }
@@ -36,7 +36,7 @@ pipeline {
         stage('PHPStan') {
             agent {
                 docker {
-                    image 'phpstan/phpstan:0.12.33'
+                    image 'phpstan/phpstan:0.12.65'
                     args '--mount type=volume,source=phpstan-cache,destination=/tmp/phpstan ' +
                         '-u root:root ' +
                         "--entrypoint='' "

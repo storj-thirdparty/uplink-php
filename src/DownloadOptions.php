@@ -32,7 +32,7 @@ class DownloadOptions
      */
     public function toCStruct(FFI $ffi): CData
     {
-        $cDownloadOptions = $ffi->new('DownloadOptions');
+        $cDownloadOptions = $ffi->new('UplinkDownloadOptions');
         $cDownloadOptions->offset = $this->offset;
         $cDownloadOptions->length = $this->length ?? -1; // if negative, it will read until the end of the blob.
 

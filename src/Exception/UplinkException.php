@@ -14,6 +14,7 @@ abstract class UplinkException extends Exception
         0x03 => Cancelled::class,
         0x04 => InvalidHandle::class,
         0x05 => TooManyRequests::class,
+        0x06 => BandwidthLimitExceeded::class,
 
         0x10 => Bucket\InvalidBucketName::class,
         0x11 => Bucket\BucketAlreadyExists::class,

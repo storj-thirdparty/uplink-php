@@ -30,7 +30,7 @@ class Download
     private FFI $ffi;
 
     /**
-     * The C struct of type Download
+     * The C struct of type UplinkDownload
      */
     private CData $cDownload;
 
@@ -54,8 +54,8 @@ class Download
 
     public function info(): ObjectInfo
     {
-        $objectResult = $this->ffi->download_info($this->cDownload);
-        $scope = Scope::exit(fn() => $this->ffi->free_object_result($objectResult));
+        $objectResult = $this->ffi->uplink_download_info($this->cDownload);
+        $scope = Scope::exit(fn() => $this->ffi->uplink_free_object_result($objectResult));
 
         Util::throwIfErrorResult($objectResult);
 
@@ -79,8 +79,8 @@ class Download
             $buffer = str_repeat("\0", $length);
         }
 
-        $readResult = $this->ffi->download_read($this->cDownload, $buffer, $length);
-        $scope = Scope::exit(fn() => $this->ffi->free_read_result($readResult));
+        $readResult = $this->ffi->uplink_download_read($this->cDownload, $buffer, $length);
+        $scope = Scope::exit(fn() => $this->ffi->uplink_free_read_result($readResult));
 
         if ($readResult->error !== null && $readResult->error->code === -1) {
             // done
@@ -130,7 +130,7 @@ class Download
         // See https://www.php.net/manual/en/function.error-get-last.php#113518
         // This will never be called because of the 0.
         set_error_handler(null, 0);
-        $scope = Scope::exit(fn() => restore_error_handler());
+        $scope = Scope::exit('restore_error_handler');
 
         $totalWritten = 0;
 

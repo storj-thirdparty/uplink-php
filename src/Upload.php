@@ -23,7 +23,7 @@ class Upload
     private FFI $ffi;
 
     /**
-     * The associated C struct of type Upload
+     * The associated C struct of type UplinkUpload
      */
     private CData $cUpload;
 
@@ -47,8 +47,8 @@ class Upload
      */
     public function write(string $content): void
     {
-        $writeResult = $this->ffi->upload_write($this->cUpload, $content, strlen($content));
-        $scope = Scope::exit(fn() => $this->ffi->free_write_result($writeResult));
+        $writeResult = $this->ffi->uplink_upload_write($this->cUpload, $content, strlen($content));
+        $scope = Scope::exit(fn() => $this->ffi->uplink_free_write_result($writeResult));
 
         Util::throwIfErrorResult($writeResult);
     }
@@ -66,7 +66,7 @@ class Upload
         // See https://www.php.net/manual/en/function.error-get-last.php#113518
         // This will never be called because of the 0.
         set_error_handler(null, 0);
-        $scope = Scope::exit(fn() => restore_error_handler());
+        $scope = Scope::exit('restore_error_handler');
 
         while (!feof($resource)) {
             $content = @fread($resource, $chunkSize);
@@ -98,8 +98,8 @@ class Upload
      */
     public function commit(): void
     {
-        $pError = $this->ffi->upload_commit($this->cUpload);
-        $scope = Scope::exit(fn() => $this->ffi->free_error($pError));
+        $pError = $this->ffi->uplink_upload_commit($this->cUpload);
+        $scope = Scope::exit(fn() => $this->ffi->uplink_free_error($pError));
 
         Util::throwIfError($pError);
     }
@@ -110,8 +110,8 @@ class Upload
      */
     public function abort(): void
     {
-        $pError = $this->ffi->upload_abort($this->cUpload);
-        $scope = Scope::exit(fn() => $this->ffi->free_error($pError));
+        $pError = $this->ffi->uplink_upload_abort($this->cUpload);
+        $scope = Scope::exit(fn() => $this->ffi->uplink_free_error($pError));
 
         Util::throwIfError($pError);
     }
@@ -121,8 +121,8 @@ class Upload
      */
     public function info(): ObjectInfo
     {
-        $objectResult = $this->ffi->upload_info($this->cUpload);
-        $scope = Scope::exit(fn() => $this->ffi->free_object_result($objectResult));
+        $objectResult = $this->ffi->uplink_upload_info($this->cUpload);
+        $scope = Scope::exit(fn() => $this->ffi->uplink_free_object_result($objectResult));
 
         Util::throwIfErrorResult($objectResult);
 
@@ -138,7 +138,7 @@ class Upload
     {
         $count = count($customMetadata);
 
-        $entriesType = FFI::arrayType($this->ffi->type('CustomMetadataEntry'), [$count]);
+        $entriesType = FFI::arrayType($this->ffi->type('UplinkCustomMetadataEntry'), [$count]);
         $cEntries = $this->ffi->new($entriesType, false);
         $scope = Scope::exit(fn() => FFI::free($cEntries));
 
@@ -157,12 +157,12 @@ class Upload
             $i++;
         }
 
-        $cCustomMetadata = $this->ffi->new('CustomMetadata');
+        $cCustomMetadata = $this->ffi->new('UplinkCustomMetadata');
         $cCustomMetadata->count = $count;
         $cCustomMetadata->entries = $cEntries;
 
-        $pError = $this->ffi->upload_set_custom_metadata($this->cUpload, $cCustomMetadata);
-        $scope->onExit(fn() => $this->ffi->free_error($pError));
+        $pError = $this->ffi->uplink_upload_set_custom_metadata($this->cUpload, $cCustomMetadata);
+        $scope->onExit(fn() => $this->ffi->uplink_free_error($pError));
 
         Util::throwIfError($pError);
     }

@@ -55,7 +55,7 @@ class Scope
 
     public function __destruct()
     {
-        foreach ($this->handlers as $handler) {
+        foreach (array_reverse($this->handlers) as $handler) {
             $handler();
         }
     }

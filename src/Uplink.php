@@ -14,6 +14,8 @@ class Uplink
 {
     /**
      * With libuplink.so and header files loaded
+     *
+     * It's recommended to have only 1 instance of FFI, multiple instances are not compatible
      */
     private FFI $ffi;
 
@@ -46,8 +48,8 @@ class Uplink
      */
     public function parseAccess(string $accessString): Access
     {
-        $accessResult = $this->ffi->parse_access($accessString);
-        $scope = Scope::exit(fn() => $this->ffi->free_access_result($accessResult));
+        $accessResult = $this->ffi->uplink_parse_access($accessString);
+        $scope = Scope::exit(fn() => $this->ffi->uplink_free_access_result($accessResult));
 
         Util::throwIfErrorResult($accessResult);
 
@@ -77,7 +79,7 @@ class Uplink
      *
      * @throws UplinkException
      */
-    function requestAccessWithPassphrase(
+    public function requestAccessWithPassphrase(
         string $satelliteAddress,
         string $apiKey,
         string $passphrase,
@@ -87,22 +89,42 @@ class Uplink
         $scope = new Scope();
         if ($config) {
             $cConfig = $config->toCStruct($this->ffi, $scope);
-            $accessResult = $this->ffi->config_request_access_with_passphrase(
+            $accessResult = $this->ffi->uplink_config_request_access_with_passphrase(
                 $cConfig,
                 $satelliteAddress,
                 $apiKey,
                 $passphrase
             );
         } else {
-            $accessResult = $this->ffi->request_access_with_passphrase($satelliteAddress, $apiKey, $passphrase);
+            $accessResult = $this->ffi->uplink_request_access_with_passphrase($satelliteAddress, $apiKey, $passphrase);
         }
-        $scope->onExit(fn() => $this->ffi->free_access_result($accessResult));
+        $scope->onExit(fn() => $this->ffi->uplink_free_access_result($accessResult));
 
         Util::throwIfErrorResult($accessResult);
 
         return new Access(
             $this->ffi,
             $accessResult->access,
+            $scope
+        );
+    }
+
+    /**
+     * Derives a salted encryption key for passphrase using the salt.
+     *
+     * This function is useful for deriving a salted encryption key for users when
+     * implementing multitenancy in a single app bucket.
+     */
+    public function deriveEncryptionKey(string $passphrase, string $salt): EncryptionKey
+    {
+        $encryptionKeyResult = $this->ffi->uplink_derive_encryption_key($passphrase, $salt, strlen($salt));
+        $scope = Scope::exit(fn() => $this->ffi->uplink_free_encryption_key_result($encryptionKeyResult));
+
+        Util::throwIfErrorResult($encryptionKeyResult);
+
+        return new EncryptionKey(
+            $this->ffi,
+            $encryptionKeyResult->encryption_key,
             $scope
         );
     }
