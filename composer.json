@@ -1,0 +1,31 @@
+{
+    "name": "storj/uplink",
+    "description": "Decentralized object storage on Tardigrade",
+    "homepage": "https://github.com/storj-thirdparty/uplink-php",
+    "type": "library",
+    "license": "MIT/Expat",
+    "authors": [
+        {
+            "name": "Erik van Velzen",
+            "email": "erik@evanv.nl"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Storj\\Uplink\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Storj\\Uplink\\Test\\": "test/"
+        }
+    },
+    "require": {
+        "php": ">=7.4",
+        "ext-ffi": "*",
+        "psr/http-message": "^1.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.2"
+    }
+}
