@@ -37,7 +37,7 @@ composer config repositories.storj/uplink '{
         "version": "0.1.0",
         "license": "MIT/Expat",
         "dist": {
-            "url": "https://build.dev.storj.io/job/uplink-php/job/PR-8/14/artifact/release.zip",
+            "url": "https://github.com/storj-thirdparty/uplink-php/releases/download/v0.1.0/release.zip",
             "type": "zip"
         },
         "autoload": {
