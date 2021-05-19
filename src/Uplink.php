@@ -73,10 +73,10 @@ class Uplink
      * (Argon2). This should be a setup-only step. Most common interactions with the library
      * should be using a serialized access grant through ->parseAccess().
      *
-     * @param string $satelliteAddress including port, e.g.:
-     *     us-central-1.tardigrade.io:7777
-     *     europe-west-1.tardigrade.io:7777
-     *     asia-east-1.tardigrade.io:7777
+     * @param string $satelliteAddress including id and port, e.g.:
+     *     12L9ZFwhzVpuEKMUNUqkaTLGzwY9G24tbiigLiXpmZWKwmcNDDs@eu1.storj.io:7777
+     *     12EayRS2V1kEsWESU9QMRseFhdxYxKicsiFmxrsLZHeLUtdps3S@us1.storj.io:7777
+     *     121RTSDpyNZVcEU84Ticf2L1ntiuUimbWgfATz21tuvgk3vzoA6@ap1.storj.io:7777
      * @param string $apiKey
      * @param string $passphrase
      * @param Config|null $config
