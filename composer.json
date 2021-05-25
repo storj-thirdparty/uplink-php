@@ -1,6 +1,6 @@
 {
     "name": "storj/uplink",
-    "description": "Decentralized object storage on Tardigrade",
+    "description": "Storj DCS client",
     "homepage": "https://github.com/storj-thirdparty/uplink-php",
     "type": "library",
     "license": "MIT/Expat",

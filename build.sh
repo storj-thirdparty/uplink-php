@@ -2,7 +2,7 @@
 set -e
 rm -rf tmp-c
 mkdir tmp-c
-git clone --branch v1.2.2 https://github.com/storj/uplink-c.git tmp-c
+git clone --branch v1.2.3 https://github.com/storj/uplink-c.git tmp-c
 cd tmp-c
 ## prefer Go release >=1.15 (aug-2020) because it preserves parameter names in the header file
 make build
@@ -18,6 +18,3 @@ sed -i 's/#ifdef __cplusplus//g' build/uplink-php.h
 sed -i 's/extern "C" {//g' build/uplink-php.h
 sed -i 's/#endif//g' build/uplink-php.h
 sed -zi 's/}\n//g' build/uplink-php.h
-
-
-

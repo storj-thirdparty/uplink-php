@@ -6,9 +6,9 @@ RUN echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/so
     && apt-get install -y libffi-dev postgresql git redis-server wget \
     && docker-php-ext-install ffi
 
-# Go 1.15 is not in debian repository buster-backports yet
-RUN wget https://dl.google.com/go/go1.15.8.linux-amd64.tar.gz \
-    && tar -xvf go1.15.8.linux-amd64.tar.gz \
+# Go >=1.15 is not in debian repository buster-backports
+RUN wget https://golang.org/dl/go1.16.4.linux-amd64.tar.gz \
+    && tar -xvf go1.16.4.linux-amd64.tar.gz \
     && mv go /usr/local
 
 ENV GOROOT=/usr/local/go

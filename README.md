@@ -1,14 +1,14 @@
 Uplink PHP client
 =============
 
-Client for decentralized object storage on [Tardigrade.io](https://tardigrade.io/)
+Client for [Storj Decentralized Cloud Storage](https://storj.io/)
 
 [▶ 40 second video](https://www.youtube.com/watch?v=QOjM5ERd8yo&feature=youtu.be)
 
 Requirements
 ----------
 
-- Tardigrade API key
+- Storj API key or Access Grant
 - PHP >= 7.4
 - Linux x64
 
@@ -66,12 +66,12 @@ composer require storj/uplink
 Usage
 ----
 
-For better response times of your web app, you should serialize your credentials to an access string.
+For better response times of your web app, you should serialize your credentials to an Access Grant.
 
 ```php
 require 'vendor/autoload.php';
 $access = \Storj\Uplink\Uplink::create()->requestAccessWithPassphrase(
-    '12L9ZFwhzVpuEKMUNUqkaTLGzwY9G24tbiigLiXpmZWKwmcNDDs@europe-west-1.tardigrade.io:7777',
+    '12L9ZFwhzVpuEKMUNUqkaTLGzwY9G24tbiigLiXpmZWKwmcNDDs@eu1.storj.io:7777',
     'mybase58apikey',
     'mypassphrase'
 );
@@ -93,5 +93,4 @@ Examples:
 - [raw/upload.php](examples/raw/upload.php) Upload files via a HTML form
 - [raw/download.php](examples/raw/download.php) Download files via the browser
 - [psr/FormUploadHandler.php](examples/psr/FormUploadHandler.php) Upload files via a HTML form in a PSR-7 framework
-- [psr/DownloadHandler.php](examples/psr/FormUploadHandler.php) Stream a PSR-7 HTTP response
-
+- [psr/DownloadHandler.php](examples/psr/DownloadHandler.php) Stream a PSR-7 HTTP response
