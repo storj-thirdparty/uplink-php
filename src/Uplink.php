@@ -3,6 +3,7 @@
 namespace Storj\Uplink;
 
 use FFI;
+use Storj\Uplink\Edge\Edge;
 use Storj\Uplink\Exception\UplinkException;
 use Storj\Uplink\Internal\Scope;
 use Storj\Uplink\Internal\Util;
@@ -169,5 +170,10 @@ class Uplink
             $encryptionKeyResult->encryption_key,
             $scope
         );
+    }
+
+    public function edgeServices(): Edge
+    {
+        return new Edge($this->ffi);
     }
 }

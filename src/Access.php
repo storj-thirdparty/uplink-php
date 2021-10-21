@@ -156,4 +156,12 @@ class Access
         $scope = Scope::exit(fn() => $this->ffi->uplink_free_error($pError));
         Util::throwIfError($pError);
     }
+
+    /**
+     * @internal
+     */
+    public function getNativeAccess(): FFI\CData
+    {
+        return $this->cAccess;
+    }
 }
