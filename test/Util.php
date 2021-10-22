@@ -4,10 +4,15 @@ namespace Storj\Uplink\Test;
 
 use RuntimeException;
 use Storj\Uplink\Access;
-use Storj\Uplink\Exception\Bucket\BucketNotEmpty;
-use Storj\Uplink\ListObjectsOptions;
 use Storj\Uplink\Project;
 use Storj\Uplink\Uplink;
+
+// Polyfill for PHP <8.0
+if (!function_exists('str_starts_with')) {
+    function str_starts_with(string $haystack, string $needle): bool {
+        return strpos($haystack, $needle) === 0;
+    }
+}
 
 class Util
 {
@@ -82,6 +87,10 @@ class Util
     {
         foreach ($project->listBuckets() as $bucket) {
             $bucketName = $bucket->getName();
+
+            if (!str_starts_with($bucketName, 'phpunit')) {
+                continue;
+            }
 
             $project->deleteBucketWithObjects($bucketName);
         }

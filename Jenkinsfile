@@ -87,7 +87,7 @@ pipeline {
         stage('PHPStan') {
             agent {
                 docker {
-                    image 'phpstan/phpstan:0.12.80'
+                    image 'phpstan/phpstan:0.12.89'
                     args '--mount type=volume,source=phpstan-cache,destination=/tmp/phpstan ' +
                         '--user root:root ' +
                         "--entrypoint='' "
