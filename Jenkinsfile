@@ -30,17 +30,36 @@ pipeline {
         //         }
         //     }
         // }
-        stage('Go build') {
+        stage('Go build x64') {
             agent {
                 docker {
-                    image docker.build("storj-ci", "--pull https://github.com/storj/ci.git#main").id
-                    args '--user root:root --volume "/tmp/gomod":/go/pkg/mod '
+                    image 'golang:1.17.2'
+                    args '--user root:root --volume /tmp/gomod:/go/pkg/mod '
                 }
             }
             steps {
                 script {
-                    sh './build.sh'
-                    stash(name: "build", includes: "build/")
+                    sh 'make build-x64'
+                    stash(name: "build-x64", includes: "build/")
+                }
+            }
+            post {
+                always {
+                    cleanWs()
+                }
+            }
+        }
+        stage('Go build arm64') {
+            agent {
+                dockerfile {
+                    dir 'docker/go-docker'
+                    args '--user root:root --volume /var/run/docker.sock:/var/run/docker.sock --volume /tmp/gomod:/go/pkg/mod '
+                }
+            }
+            steps {
+                script {
+                    sh 'make build-arm64'
+                    stash(name: "build-arm64", includes: "build/libuplink-aarch64-linux.so")
                 }
             }
             post {
@@ -57,7 +76,8 @@ pipeline {
                 }
             }
             steps {
-                unstash "build"
+                unstash "build-x64"
+                unstash "build-arm64"
                 sh "zip -r release.zip *"
                 archiveArtifacts "release.zip"
             }
@@ -106,12 +126,13 @@ pipeline {
         stage('PHPUnit') {
             agent {
                 dockerfile {
+                    dir 'docker/phpunit'
                     args '--user root:root '
                 }
             }
             steps {
                 unstash "vendor"
-                unstash "build"
+                unstash "build-x64"
                 sh 'service postgresql start'
                 sh '''su -s /bin/bash -c "psql -U postgres -c 'create database teststorj;'" postgres'''
                 sh 'PATH="/root/go/bin:$PATH" && storj-sim network setup --postgres=postgres://postgres@localhost/teststorj?sslmode=disable'

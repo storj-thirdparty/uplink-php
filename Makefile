@@ -1,0 +1,54 @@
+SHELL = /bin/bash
+
+ifndef GOMODCACHE
+$(eval GOMODCACHE=$(shell go env | grep GOMODCACHE | sed -E 's/GOMODCACHE="(.*)"/\1/'))
+endif
+
+
+tmp/uplink-c:
+	mkdir -p tmp
+	git clone --branch v1.5.0 https://github.com/storj/uplink-c.git ./tmp/uplink-c
+
+.PHONY: clean
+clean:
+	rm -rf build tmp
+
+build/libuplink-x86_64-linux.so tmp/uplink-c/.build/uplink/uplink.h tmp/uplink-c/.build/uplink/uplink_definitions.h: tmp/uplink-c
+	cd tmp/uplink-c && make build
+	mkdir -p build
+	cat tmp/uplink-c/.build/libuplink.so > build/libuplink-x86_64-linux.so
+
+build/libuplink-aarch64-linux.so: tmp/uplink-c
+	docker run --rm \
+		-v $(GOMODCACHE):/go/pkg/mod \
+		-v $(PWD)/tmp:$(PWD)/tmp \
+		--workdir $(PWD)/tmp/uplink-c \
+		-e CGO_ENABLED=1 \
+		docker.elastic.co/beats-dev/golang-crossbuild:1.17.1-arm \
+		--build-cmd "make build" \
+		-p "linux/arm64"
+	mkdir -p build
+	cat ./tmp/uplink-c/.build/libuplink.so > build/libuplink-aarch64-linux.so
+
+build/uplink-php.h: tmp/uplink-c/.build/uplink/uplink.h tmp/uplink-c/.build/uplink/uplink_definitions.h
+	## create C header file
+	cat ./tmp/uplink-c/.build/uplink/uplink_definitions.h \
+		./tmp/uplink-c/.build/uplink/uplink.h \
+		> build/uplink-php.h
+	## remove stuff PHP can't handle
+	sed -i 's/typedef __SIZE_TYPE__ GoUintptr;//g' build/uplink-php.h
+	sed -i 's/typedef float _Complex GoComplex64;//g' build/uplink-php.h
+	sed -i 's/typedef double _Complex GoComplex128;//g' build/uplink-php.h
+	sed -i 's/#ifdef __cplusplus//g' build/uplink-php.h
+	sed -i 's/extern "C" {//g' build/uplink-php.h
+	sed -i 's/#endif//g' build/uplink-php.h
+	sed -zi 's/}\n//g' build/uplink-php.h
+
+.PHONY:
+build: build-x64 build-arm64
+
+.PHONY:
+build-x64: build/libuplink-x86_64-linux.so build/uplink-php.h
+
+.PHONY:
+build-arm64: build/libuplink-aarch64-linux.so build/uplink-php.h
