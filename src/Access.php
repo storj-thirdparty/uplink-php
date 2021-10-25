@@ -53,7 +53,8 @@ class Access
     {
         $scope = new Scope();
         if ($config) {
-            $cConfig = $config->toCStruct($this->ffi, $scope);
+            $innerScope = new Scope();
+            $cConfig = $config->toCStruct($this->ffi, $innerScope);
             $projectResult = $this->ffi->uplink_config_open_project($cConfig, $this->cAccess);
         } else {
             $projectResult = $this->ffi->uplink_open_project($this->cAccess);

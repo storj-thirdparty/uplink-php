@@ -20,7 +20,7 @@ class EncryptionKeyTest extends TestCase
      */
     public function testWrongPasswordCantDownload(): void
     {
-        $bucket = 'bucket1';
+        $bucket = 'phpunit1';
         $prefix = 'prefix1';
         $object = 'object1';
 
@@ -65,7 +65,7 @@ class EncryptionKeyTest extends TestCase
 
     public function testWrongSaltCantDownload(): void
     {
-        $bucket = 'bucket1';
+        $bucket = 'phpunit1';
         $prefix = 'prefix1';
         $object = 'object1';
 
@@ -110,7 +110,7 @@ class EncryptionKeyTest extends TestCase
 
     public function testHappyFlow(): void
     {
-        $bucket = 'bucket1';
+        $bucket = 'phpunit1';
         $prefix = 'prefix1';
         $object = 'object1';
 

@@ -30,7 +30,7 @@ class AccessTest extends TestCase
             (new Config())->withDialTimeoutMilliseconds(1)
         );
 
-        $project->ensureBucket('asdfasdf');
+        $project->ensureBucket('phpunit');
     }
 
     public function testSatteliteAddress(): void
