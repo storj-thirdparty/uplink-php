@@ -220,12 +220,19 @@ class Project
     /**
      * @throws UplinkException
      */
-    public function deleteObject(string $bucketName, string $objectKey): ObjectInfo
+    public function deleteObject(string $bucketName, string $objectKey): ?ObjectInfo
     {
         $objectResult = $this->ffi->uplink_delete_object($this->cProject, $bucketName, $objectKey);
         $scope = Scope::exit(fn() => $this->ffi->uplink_free_object_result($objectResult));
 
         Util::throwIfErrorResult($objectResult);
+
+        // In case the object does not exist
+        // or in case you have delete permission but no read permission
+        // there is no ObjectInfo but no error either.
+        if ($objectResult->object === null) {
+            return null;
+        }
 
         return new ObjectInfo($objectResult->object, true, true);
     }
