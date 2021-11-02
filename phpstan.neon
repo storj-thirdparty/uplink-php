@@ -11,6 +11,10 @@ parameters:
 			paths:
 			- test/ListObjectsTest.php
 		-
+			message: "#^Binary operation \"\\-\" between int and string results in an error\\.$#"
+			count: 1
+			path: test/StatObjectTest.php
+		-
 			message: "#^Property Storj\\\\Uplink\\\\Access\\:\\:\\$scope is never read, only written\\.$#"
 			count: 1
 			path: src/Access.php
