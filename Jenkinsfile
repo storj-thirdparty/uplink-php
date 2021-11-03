@@ -34,12 +34,16 @@ pipeline {
             agent {
                 docker {
                     image 'golang:1.17.2'
-                    args '--user root:root --volume /tmp/gomod:/go/pkg/mod '
+                    args "--volume /tmp/gomod:/go/pkg/mod --user root:root"
                 }
             }
             steps {
                 script {
-                    sh 'make build-x64'
+                    // get owner UID of working directory to run commands as that user
+                    def userId = sh(script: "stat -c '%u' .", returnStdout: true).trim()
+                    sh "useradd --create-home --uid ${userId} jenkins"
+
+                    sh 'su jenkins -c "make build-x64"'
                     stash(name: "build-x64", includes: "build/")
                 }
             }
@@ -53,12 +57,20 @@ pipeline {
             agent {
                 dockerfile {
                     dir 'docker/go-docker'
-                    args '--user root:root --volume /var/run/docker.sock:/var/run/docker.sock --volume /tmp/gomod:/go/pkg/mod '
+                    args '--volume /var/run/docker.sock:/var/run/docker.sock --volume /tmp/gomod:/go/pkg/mod --user root:root'
                 }
             }
             steps {
                 script {
-                    sh 'make build-arm64'
+                    // get owner UID of working directory to run commands as that user
+                    def dockerGroupId = sh(script: "stat -c '%g' /var/run/docker.sock", returnStdout: true).trim()
+                    def userId = sh(script: "stat -c '%u' .", returnStdout: true).trim()
+                    // set group id of docker group to that of the host so we may access /var/run/docker.sock
+                    sh "groupmod --gid ${dockerGroupId} docker"
+                    sh "useradd --create-home --gid ${dockerGroupId} --uid ${userId} jenkins"
+                    sh "newgrp docker"
+
+                    sh 'su jenkins -c "make build-arm64"'
                     stash(name: "build-arm64", includes: "build/libuplink-aarch64-linux.so")
                 }
             }

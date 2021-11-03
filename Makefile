@@ -4,6 +4,7 @@ ifndef GOMODCACHE
 $(eval GOMODCACHE=$(shell go env | grep GOMODCACHE | sed -E 's/GOMODCACHE="(.*)"/\1/'))
 endif
 
+UID := $(shell id -u)
 
 tmp/uplink-c:
 	mkdir -p tmp
@@ -25,7 +26,7 @@ build/libuplink-aarch64-linux.so: tmp/uplink-c
 		--workdir $(PWD)/tmp/uplink-c \
 		-e CGO_ENABLED=1 \
 		docker.elastic.co/beats-dev/golang-crossbuild:1.17.1-arm \
-		--build-cmd "make build" \
+		--build-cmd "useradd --create-home --uid $(UID) jenkins && su jenkins -c 'PATH=\$$PATH:/go/bin:/usr/local/go/bin make build'" \
 		-p "linux/arm64"
 	mkdir -p build
 	cat ./tmp/uplink-c/.build/libuplink.so > build/libuplink-aarch64-linux.so
