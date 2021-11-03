@@ -9,11 +9,6 @@ use Storj\Uplink\Internal\Scope;
 class EncryptionKey
 {
     /**
-     * With libuplink.so and header files loaded
-     */
-    private FFI $ffi;
-
-    /**
      * The associated C struct of type UplinkEncryptionKey
      */
     private CData $cEncryptionKey;
@@ -26,9 +21,8 @@ class EncryptionKey
     /**
      * @internal
      */
-    public function __construct(FFI $ffi, CData $cEncryptionKey, Scope $scope)
+    public function __construct(CData $cEncryptionKey, Scope $scope)
     {
-        $this->ffi = $ffi;
         $this->cEncryptionKey = $cEncryptionKey;
         $this->scope = $scope;
     }

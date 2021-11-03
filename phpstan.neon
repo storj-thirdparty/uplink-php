@@ -1,12 +1,26 @@
 parameters:
-    level: 6
-    paths:
-        - src
-        - test
-    ignoreErrors:
-        - '/Call to an undefined method FFI::.*/'
-        - '/Access to an undefined property FFI\\CData::.*/'
-        -
-            message: '/Binary operation "-" between string&numeric and string results in an error./'
-            paths:
-                - test/ListObjectsTest.php
+	level: 6
+	paths:
+		- src
+		- test
+	ignoreErrors:
+		- '/Call to an undefined method FFI::.*/'
+		- '/Access to an undefined property FFI\\CData::.*/'
+		-
+			message: '/Binary operation "-" between numeric-string and string results in an error./'
+			paths:
+			- test/ListObjectsTest.php
+		-
+			message: "#^Property Storj\\\\Uplink\\\\Access\\:\\:\\$scope is never read, only written\\.$#"
+			count: 1
+			path: src/Access.php
+
+		-
+			message: "#^Property Storj\\\\Uplink\\\\EncryptionKey\\:\\:\\$scope is never read, only written\\.$#"
+			count: 1
+			path: src/EncryptionKey.php
+
+		-
+			message: "#^Property Storj\\\\Uplink\\\\Project\\:\\:\\$scope is never read, only written\\.$#"
+			count: 1
+			path: src/Project.php

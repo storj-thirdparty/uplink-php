@@ -127,7 +127,6 @@ class Uplink
         Util::throwIfErrorResult($encryptionKeyResult);
 
         return new EncryptionKey(
-            $this->ffi,
             $encryptionKeyResult->encryption_key,
             $scope
         );
