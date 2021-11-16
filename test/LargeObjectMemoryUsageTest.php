@@ -5,7 +5,7 @@ namespace Storj\Uplink\Test;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @group memory-usage
+ * @group large-object
  */
 class LargeObjectMemoryUsageTest extends TestCase
 {
@@ -13,7 +13,7 @@ class LargeObjectMemoryUsageTest extends TestCase
     {
         self::assertLessThan(20_000_000, memory_get_peak_usage());
 
-        $inputFile = self::create40mbFile();
+        $inputFile = Util::createTmpFile(40_000_000);
         $outputFile = tmpfile();
 
         $project = Util::emptyAccess()->openProject();
@@ -43,21 +43,5 @@ class LargeObjectMemoryUsageTest extends TestCase
             hash_file('sha256', $inputFileName),
             hash_file('sha256', $outputFileName)
         );
-    }
-
-    /**
-     * @return resource
-     */
-    private static function create40mbFile()
-    {
-        $size = 0;
-        $chunksize = 8_000;
-        $resource = tmpfile();
-        while ($size < 40_000_000) {
-            fwrite($resource, random_bytes($chunksize));
-            $size += $chunksize;
-        }
-        rewind($resource);
-        return $resource;
     }
 }

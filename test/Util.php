@@ -95,4 +95,19 @@ class Util
             $project->deleteBucketWithObjects($bucketName);
         }
     }
+
+    /**
+     * @return false|resource
+     */
+    public static function createTmpFile(int $size, int $chunksize = 8_000)
+    {
+        $resource = tmpfile();
+        while ($size > 0) {
+            $length = min($size, $chunksize);
+            fwrite($resource, random_bytes($length));
+            $size -= $length;
+        }
+        rewind($resource);
+        return $resource;
+    }
 }
