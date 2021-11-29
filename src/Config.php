@@ -26,7 +26,7 @@ class Config
 
     public function __construct()
     {
-        $this->tempDirectory = $tempDirectory ?? sys_get_temp_dir();
+        $this->tempDirectory = sys_get_temp_dir();
     }
 
     public function withUserAgent(string $userAgent): self

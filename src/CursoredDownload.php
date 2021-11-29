@@ -15,16 +15,17 @@ class CursoredDownload extends Download
 
     private bool $done = false;
 
-    public function read(int $length = self::CHUNKSIZE, ?string &$buffer = null): string
+    public function readChunkToString(string &$buffer): ReadResult
     {
-        $read = parent::read($length, $buffer);
+        $readResult = parent::readChunkToString($buffer);
 
-        $this->offset += strlen($read);
-        if ($read === '') {
+        $this->offset += $readResult->getLength();
+
+        if ($readResult->isEof()) {
             $this->done = true;
         }
 
-        return $read;
+        return $readResult;
     }
 
     public function getOffset(): int

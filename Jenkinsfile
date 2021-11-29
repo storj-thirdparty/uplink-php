@@ -119,7 +119,7 @@ pipeline {
         stage('PHPStan') {
             agent {
                 docker {
-                    image 'phpstan/phpstan:0.12.89'
+                    image 'ghcr.io/phpstan/phpstan:1.0.2'
                     args '--mount type=volume,source=phpstan-cache,destination=/tmp/phpstan ' +
                         '--user root:root ' +
                         "--entrypoint='' "

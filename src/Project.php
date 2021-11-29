@@ -238,6 +238,20 @@ class Project
     }
 
     /**
+     * Return information about an object at the specific key.
+     * Can not be used to confirm the existence of a prefix.
+     */
+    public function statObject(string $bucketName, string $objectKey): ObjectInfo
+    {
+        $objectResult = $this->ffi->uplink_stat_object($this->cProject, $bucketName, $objectKey);
+        $scope = Scope::exit(fn() => $this->ffi->uplink_free_object_result($objectResult));
+
+        Util::throwIfErrorResult($objectResult);
+
+        return new ObjectInfo($objectResult->object, true, true);
+    }
+
+    /**
      * @param string $bucketName
      * @return ObjectInfo[]|Generator<ObjectInfo>
      */

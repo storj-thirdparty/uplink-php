@@ -5,12 +5,10 @@ namespace Storj\Uplink;
 use FFI;
 use FFI\CData;
 use Generator;
-use Psr\Http\Message\StreamInterface;
 use Storj\Uplink\Exception\IOException;
 use Storj\Uplink\Exception\UplinkException;
 use Storj\Uplink\Internal\Scope;
 use Storj\Uplink\Internal\Util;
-use Storj\Uplink\CursoredDownload;
 use Storj\Uplink\PsrStream\ReadStream;
 
 /**
@@ -80,17 +78,45 @@ class Download
             $buffer = str_repeat("\0", $length);
         }
 
-        $readResult = $this->ffi->uplink_download_read($this->cDownload, $buffer, $length);
-        $scope = Scope::exit(fn() => $this->ffi->uplink_free_read_result($readResult));
+        $readResult = $this->readChunkToString($buffer);
 
-        if ($readResult->error !== null && $readResult->error->code === -1) {
-            // done
-            return '';
+        if ($readResult->isEof()) {
+            return $readResult->getBytes();
         }
 
-        Util::throwIfErrorResult($readResult);
+        // No data was returned but there was no EOF. Keep reading.
+        if ($readResult->getLength() === 0) {
+            return $this->read($length, $buffer);
+        }
 
-        return substr($buffer, 0, $readResult->bytes_read);
+        return $readResult->getBytes();
+    }
+
+    /**
+     * Low-level function to read a chunk of a download.
+     * Probably you'll want to use one of the other methods.
+     *
+     * It allocates a string to put the result, because it has no measurable impact on performance.
+     *
+     * @throws UplinkException
+     */
+    public function readChunkToString(string& $buffer): ReadResult
+    {
+        $cReadResult = $this->ffi->uplink_download_read($this->cDownload, $buffer, strlen($buffer));
+        $scope = Scope::exit(fn() => $this->ffi->uplink_free_read_result($cReadResult));
+
+        $readResult = new ReadResult(
+            substr($buffer, 0, $cReadResult->bytes_read),
+            ($cReadResult->error !== null && $cReadResult->error->code === -1)
+        );
+
+        // If there is an error but still data, first return the data.
+        // Return the error of the next call to uplink_download_read().
+        if (!$readResult->isEof() && $readResult->getLength() === 0) {
+            Util::throwIfErrorResult($cReadResult);
+        }
+
+        return $readResult;
     }
 
     /**
@@ -157,15 +183,16 @@ class Download
      */
     public function iterate(int $chunkSize = self::CHUNKSIZE): Generator
     {
-        $buffer = $buffer = str_repeat("\0", $chunkSize);
+        $buffer = str_repeat("\0", $chunkSize);
 
         while (true) {
-            $chunk = $this->read($chunkSize, $buffer);
-            if (strlen($chunk) === 0) {
+            $readResult = $this->readChunkToString($buffer);
+            if ($readResult->isEof()) {
+                yield $readResult->getBytes();
                 return;
             }
 
-            yield $chunk;
+            yield $readResult->getBytes();
         }
     }
 
