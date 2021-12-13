@@ -58,7 +58,7 @@ class Download
 
         Util::throwIfErrorResult($objectResult);
 
-        return new ObjectInfo($objectResult->object, true, true);
+        return ObjectInfo::fromCStruct($objectResult->object, true, true);
     }
 
     /**
