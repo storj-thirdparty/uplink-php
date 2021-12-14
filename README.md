@@ -34,10 +34,10 @@ composer config repositories.storj/uplink '{
     "type": "package",
     "package": {
         "name": "storj/uplink",
-        "version": "0.1.0",
+        "version": "1.1.0",
         "license": "MIT/Expat",
         "dist": {
-            "url": "https://github.com/storj-thirdparty/uplink-php/releases/download/v0.1.0/release.zip",
+            "url": "https://link.us1.storjshare.io/raw/jxmgbsqc4k2bbhuv27556pcoh7ra/uplink-php-releases/uplink-php-v1.1.0.zip",
             "type": "zip"
         },
         "autoload": {
