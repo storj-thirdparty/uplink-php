@@ -234,7 +234,7 @@ class Project
             return null;
         }
 
-        return new ObjectInfo($objectResult->object, true, true);
+        return ObjectInfo::fromCStruct($objectResult->object, true, true);
     }
 
     /**
@@ -248,7 +248,7 @@ class Project
 
         Util::throwIfErrorResult($objectResult);
 
-        return new ObjectInfo($objectResult->object, true, true);
+        return ObjectInfo::fromCStruct($objectResult->object, true, true);
     }
 
     /**
@@ -274,7 +274,7 @@ class Project
             $innerScope = Scope::exit(fn() => $this->ffi->uplink_free_object($pObject));
 
             // Why do we do [0] here but not when dereferencing ObjectResult::object?
-            yield new ObjectInfo(
+            yield ObjectInfo::fromCStruct(
                 $pObject[0],
                 $listObjectsOptions->includeSystemMetadata(),
                 $listObjectsOptions->includeCustomMetadata()

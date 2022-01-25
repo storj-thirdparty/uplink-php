@@ -35,13 +35,28 @@ class ObjectInfo
     private ?array $customMetaData;
 
     /**
-     * @internal
+     * @param string[]|null $customMetaData
      */
     public function __construct(
+        string $key,
+        bool $isPrefix,
+        ?SystemMetadata $systemMetadata,
+        ?array $customMetaData
+    ) {
+        $this->key = $key;
+        $this->isPrefix = $isPrefix;
+        $this->systemMetadata = $systemMetadata;
+        $this->customMetaData = $customMetaData;
+    }
+    
+    /**
+     * @internal
+     */
+    public static function fromCStruct(
         CData $cObjectInfo,
         bool $includeSystemMetadata,
         bool $includeCustomMetaData
-    ) {
+    ): self {
         $systemMetaData = null;
         if ($includeSystemMetadata) {
             $systemMetaData = new SystemMetadata($cObjectInfo->system);
@@ -52,10 +67,12 @@ class ObjectInfo
             $customMetaData = self::createCustomMetaDataFromCStruct($cObjectInfo->custom);
         }
 
-        $this->key = FFI::string($cObjectInfo->key);
-        $this->isPrefix = $cObjectInfo->is_prefix;
-        $this->systemMetadata = $systemMetaData;
-        $this->customMetaData = $customMetaData;
+        return new self(
+            FFI::string($cObjectInfo->key),
+            $cObjectInfo->is_prefix,
+            $systemMetaData,
+            $customMetaData
+        );
     }
 
     /**

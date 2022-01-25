@@ -42,6 +42,7 @@ pipeline {
                     // get owner UID of working directory to run commands as that user
                     def userId = sh(script: "stat -c '%u' .", returnStdout: true).trim()
                     sh "useradd --create-home --uid ${userId} jenkins"
+                    sh "chown -R jenkins /go/pkg/mod"
 
                     sh 'su jenkins -c "make build-x64"'
                     stash(name: "build-x64", includes: "build/")
@@ -57,7 +58,7 @@ pipeline {
             agent {
                 dockerfile {
                     dir 'docker/go-docker'
-                    args '--volume /var/run/docker.sock:/var/run/docker.sock --volume /tmp/gomod:/go/pkg/mod --user root:root'
+                    args '--volume /var/run/docker.sock:/var/run/docker.sock --user root:root'
                 }
             }
             steps {
