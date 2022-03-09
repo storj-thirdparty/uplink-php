@@ -20,13 +20,14 @@ class Config
 
     /**
      * Where to save data during downloads to use less memory.
-     * Use "inmemory" to store in-memory
+     * For example set it to PHP's sys_get_temp_dir().
+     * Use "inmemory" to store in-memory.
      */
     private string $tempDirectory;
 
     public function __construct()
     {
-        $this->tempDirectory = sys_get_temp_dir();
+        $this->tempDirectory = "inmemory";
     }
 
     public function withUserAgent(string $userAgent): self
