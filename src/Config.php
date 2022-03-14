@@ -11,6 +11,11 @@ use Storj\Uplink\Internal\Util;
  */
 class Config
 {
+    /**
+     * User agent in RFC 7231 format.
+     * Example: "myapp/0.22.1 uplink-php/1.1.0"
+     * This is used by Storj for the purpose of troubleshooting and customer analytics.
+     */
     private string $userAgent = 'uplink-php';
 
     /**
@@ -23,13 +28,19 @@ class Config
      * For example set it to PHP's sys_get_temp_dir().
      * Use "inmemory" to store in-memory.
      */
-    private string $tempDirectory;
+    private string $tempDirectory = "inmemory";
 
-    public function __construct()
+    /**
+     * Prepend the user agent of your application to the library user agent.
+     */
+    public function prependUserAgent(string $userAgent): self
     {
-        $this->tempDirectory = "inmemory";
+        return $this->withUserAgent("$userAgent $this->userAgent");
     }
 
+    /**
+     * Override user agent, discarding the library user agent.
+     */
     public function withUserAgent(string $userAgent): self
     {
         $clone = clone $this;
