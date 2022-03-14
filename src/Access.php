@@ -51,15 +51,15 @@ class Access
      */
     public function openProject(?Config $config = null): Project
     {
-        $scope = new Scope();
-        if ($config) {
-            $innerScope = new Scope();
-            $cConfig = $config->toCStruct($this->ffi, $innerScope);
-            $projectResult = $this->ffi->uplink_config_open_project($cConfig, $this->cAccess);
-        } else {
-            $projectResult = $this->ffi->uplink_open_project($this->cAccess);
+        if ($config === null) {
+            // Initialize default config so that we set a user-agent.
+            $config = new Config();
         }
-        $scope->onExit(fn() => $this->ffi->uplink_free_project_result($projectResult));
+        $innerScope = new Scope();
+        $cConfig = $config->toCStruct($this->ffi, $innerScope);
+        $projectResult = $this->ffi->uplink_config_open_project($cConfig, $this->cAccess);
+
+        $scope = Scope::exit(fn() => $this->ffi->uplink_free_project_result($projectResult));
 
         Util::throwIfErrorResult($projectResult);
 
