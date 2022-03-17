@@ -1,4 +1,5 @@
 SHELL = /bin/bash
+.SHELLFLAGS=-O globstar -c
 
 ifndef GOMODCACHE
 $(eval GOMODCACHE=$(shell go env | grep GOMODCACHE | sed -E 's/GOMODCACHE="(.*)"/\1/'))
@@ -45,11 +46,24 @@ build/uplink-php.h: tmp/uplink-c/.build/uplink/uplink.h tmp/uplink-c/.build/upli
 	sed -i 's/#endif//g' build/uplink-php.h
 	sed -zi 's/}\n//g' build/uplink-php.h
 
-.PHONY:
+.PHONY: build
 build: build-x64 build-arm64
 
-.PHONY:
+.PHONY: build-x64
 build-x64: build/libuplink-x86_64-linux.so build/uplink-php.h
 
-.PHONY:
+.PHONY: build-arm64
 build-arm64: build/libuplink-aarch64-linux.so build/uplink-php.h
+
+## declared without prerequites just to run it
+release.zip:
+	zip release.zip \
+		LICENSE \
+		MAINTAINERS.md \
+		Makefile \
+		README.md \
+		build/*.so \
+		build/uplink-php.h \
+		composer.json \
+		src/**/*.php \
+		test/**/*.php
