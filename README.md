@@ -3,14 +3,18 @@ Uplink PHP client
 
 Client for [Storj Decentralized Cloud Storage](https://storj.io/)
 
-[▶ 40 second video](https://www.youtube.com/watch?v=QOjM5ERd8yo&feature=youtu.be)
+- [Requirements](#Requirements)
+- [Installation](#Installation)
+- [Performance](#Performance)
+- [Examples](#Examples)
 
 Requirements
 ----------
 
-- Storj API key or Access Grant
+- Storj API key or Access Grant. Obtain one from the dashboard ([eu1](https://eu1.storj.io/access-grants), [us1](https://us1.storj.io/access-grants), [ap1](https://ap1.storj.io/access-grants))
 - PHP >= 7.4
-- Linux x64
+- Linux
+- x86-64 or ARM64
 
 Installation
 ---------
@@ -63,10 +67,10 @@ composer config repositories.storj/uplink '{
 composer require storj/uplink
 ```
 
-Usage
+Performance
 ----
 
-For better response times of your web app, you should serialize your credentials to an Access Grant.
+For better response times of your web app, you should not use an API key every request. Instead serialize your credentials to an Access Grant:
 
 ```php
 require 'vendor/autoload.php';
@@ -79,7 +83,7 @@ $serialized = $access->serialize();
 echo $serialized;
 ```
 
-If you have already used uplink-cli you can read this from `~/.local/share/storj/uplink/config.yaml`
+If you have already used uplink-cli you can read the Access Grant from `~/.local/share/storj/uplink/config.yaml`
 or share it using `$ uplink share`
 
 You can then use this in your web app:
@@ -88,8 +92,11 @@ You can then use this in your web app:
 $access = \Storj\Uplink\Uplink::create()->parseAccess($serialized);
 ```
 
-Examples:
+Examples
+------
 
+- [▶ 40 second command-line demo](https://www.youtube.com/watch?v=QOjM5ERd8yo)
+- [▶ Beginner website tutorial](https://www.youtube.com/watch?v=QOjM5ERd8yo&feature=youtu.be)
 - [raw/upload.php](examples/raw/upload.php) Upload files via a HTML form
 - [raw/download.php](examples/raw/download.php) Download files via the browser
 - [psr/FormUploadHandler.php](examples/psr/FormUploadHandler.php) Upload files via a HTML form in a PSR-7 framework
