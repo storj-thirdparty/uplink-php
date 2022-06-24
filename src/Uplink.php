@@ -36,10 +36,45 @@ class Uplink
         $os = str_replace(' ', '_', strtolower(php_uname('s')));
         $extension = strpos($os, 'windows') !== false ? 'dll' : 'so';
 
-        $ffi = FFI::cdef(
-            file_get_contents($root . '/build/uplink-php.h'),
-            "{$root}/build/libuplink-{$arch}-{$os}.{$extension}"
-        );
+        $libuplinkSo = "{$root}/build/libuplink-{$arch}-{$os}.{$extension}";
+        try {
+            $ffi = FFI::cdef(
+                file_get_contents($root . '/build/uplink-php.h'),
+                $libuplinkSo
+            );
+        } catch (\FFI\Exception $ffiException) {
+            // dlerror() may have a more detailed error.
+            // Example: no permission, wrong glibc version, unknown binary format etc.
+            // This check should really be in PHP core.
+            try {
+                $ffi2 = FFI::cdef("
+                    void *dlopen(const char *filename, int flags);
+                    char *dlerror();
+                    int dlclose(void *handle); 
+                ");
+                $handle = $ffi2->dlopen($libuplinkSo, 1);
+                $scope = Scope::exit(function() use ($handle, $ffi2) {
+                    if ($handle !== null) {
+                        $ffi2->dlclose($handle);
+                    }
+                });
+                $cError = $ffi2->dlerror();
+            } catch (\Throwable $innerException) {
+                // error when calling dlopen/dlerror, rethrow original error
+                throw $ffiException;
+            }
+
+            if ($cError == null) {
+                // dlerror had no info, rethrow original error
+                throw $ffiException;
+            }
+
+            $dlErrorMessage = FFI::string($cError);
+
+            throw new \FFI\Exception(
+                $ffiException->getMessage() . ": " . $dlErrorMessage
+            );
+        }
 
         return new self($ffi);
     }
