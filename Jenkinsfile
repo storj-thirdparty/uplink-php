@@ -83,15 +83,14 @@ pipeline {
         }
         stage('Release') {
             agent {
-                docker {
-                    image 'kramos/alpine-zip:latest'
-                    args '--entrypoint ""'
+                dockerfile {
+                    dir 'docker/zip'
                 }
             }
             steps {
                 unstash "build-x64"
                 unstash "build-arm64"
-                sh "zip -r release.zip *"
+                sh "make release.zip"
                 archiveArtifacts "release.zip"
             }
             post {
