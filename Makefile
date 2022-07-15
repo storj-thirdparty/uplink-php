@@ -26,11 +26,23 @@ build/libuplink-aarch64-linux.so: tmp/uplink-c
 		-v $(PWD)/tmp:$(PWD)/tmp \
 		--workdir $(PWD)/tmp/uplink-c \
 		-e CGO_ENABLED=1 \
-		docker.elastic.co/beats-dev/golang-crossbuild:1.17.3-arm \
+		docker.elastic.co/beats-dev/golang-crossbuild:1.18.3-arm \
 		--build-cmd "useradd --create-home --uid $(UID) jenkins && chown -R jenkins /go/pkg/mod && su jenkins -c 'PATH=\$$PATH:/go/bin:/usr/local/go/bin make build'" \
 		-p "linux/arm64"
 	mkdir -p build
 	cat ./tmp/uplink-c/.build/libuplink.so > build/libuplink-aarch64-linux.so
+
+build/libuplink-amd64-windows_nt.dll: tmp/uplink-c
+	docker run --rm \
+		-v /tmp/gomod:/go/pkg/mod \
+		-v $(PWD)/tmp:$(PWD)/tmp \
+		--workdir $(PWD)/tmp/uplink-c \
+		-e CGO_ENABLED=1 \
+		docker.elastic.co/beats-dev/golang-crossbuild:1.18.3-main-debian10 \
+		--build-cmd "useradd --create-home --uid $(UID) jenkins && chown -R jenkins /go/pkg/mod && su jenkins -c 'PATH=\$$PATH:/go/bin:/usr/local/go/bin make build'" \
+		-p "windows/amd64"
+	mkdir -p build
+	cat ./tmp/uplink-c/.build/libuplink.so > build/libuplink-amd64-windows_nt.dll
 
 build/uplink-php.h: tmp/uplink-c/.build/uplink/uplink.h tmp/uplink-c/.build/uplink/uplink_definitions.h
 	## create C header file
@@ -47,13 +59,16 @@ build/uplink-php.h: tmp/uplink-c/.build/uplink/uplink.h tmp/uplink-c/.build/upli
 	sed -zi 's/}\n//g' build/uplink-php.h
 
 .PHONY: build
-build: build-x64 build-arm64
+build: build-x64 build-arm64 build-windows
 
 .PHONY: build-x64
 build-x64: build/libuplink-x86_64-linux.so build/uplink-php.h
 
 .PHONY: build-arm64
 build-arm64: build/libuplink-aarch64-linux.so build/uplink-php.h
+
+.PHONY: build-windows
+build-windows: build/libuplink-amd64-windows_nt.dll build/uplink-php.h
 
 ## declared without prerequites just to run it
 release.zip:
@@ -63,6 +78,7 @@ release.zip:
 		Makefile \
 		README.md \
 		build/*.so \
+		build/*.dll \
 		build/uplink-php.h \
 		composer.json \
 		src/**/*.php \
