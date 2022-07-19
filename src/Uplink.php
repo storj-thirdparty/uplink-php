@@ -32,12 +32,13 @@ class Uplink
     {
         $root = realpath(__DIR__ . '/..');
 
-        $arch = php_uname('m');
-        $os = strtolower(php_uname('s'));
+        $arch = strtolower(php_uname('m'));
+        $os = str_replace(' ', '_', strtolower(php_uname('s')));
+        $extension = strpos($os, 'windows') !== false ? 'dll' : 'so';
 
         $ffi = FFI::cdef(
             file_get_contents($root . '/build/uplink-php.h'),
-            "{$root}/build/libuplink-{$arch}-{$os}.so"
+            "{$root}/build/libuplink-{$arch}-{$os}.{$extension}"
         );
 
         return new self($ffi);

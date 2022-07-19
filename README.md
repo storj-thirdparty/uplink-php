@@ -13,8 +13,12 @@ Requirements
 
 - Storj API key or Access Grant. Obtain one from the dashboard ([eu1](https://eu1.storj.io/access-grants), [us1](https://us1.storj.io/access-grants), [ap1](https://ap1.storj.io/access-grants))
 - PHP >= 7.4
-- Linux
-- x86-64 or ARM64
+- Any of:
+  - Linux x86-64 with GLIBC >=2.28
+  - Linux ARM64 with GLIBC >=2.28
+  - Windows x86-64
+
+Other platforms or older GLIBC versions are possible. You will need to compile [Uplink-C](https://github.com/storj/uplink-c) for the platform and place the shared library in the "build" folder.
 
 Installation
 ---------
@@ -38,10 +42,10 @@ composer config repositories.storj/uplink '{
     "type": "package",
     "package": {
         "name": "storj/uplink",
-        "version": "1.1.0",
+        "version": "1.2.0",
         "license": "MIT/Expat",
         "dist": {
-            "url": "https://link.us1.storjshare.io/raw/jxmgbsqc4k2bbhuv27556pcoh7ra/uplink-php-releases/uplink-php-v1.1.0.zip",
+            "url": "https://link.us1.storjshare.io/raw/jxmgbsqc4k2bbhuv27556pcoh7ra/uplink-php-releases/uplink-php-v1.2.0.zip",
             "type": "zip"
         },
         "autoload": {

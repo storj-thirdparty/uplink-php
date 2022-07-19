@@ -33,7 +33,7 @@ pipeline {
         stage('Go build x64') {
             agent {
                 docker {
-                    image 'golang:1.17.2'
+                    image 'golang:1.18.3-buster'
                     args "--volume /tmp/gomod:/go/pkg/mod --user root:root"
                 }
             }
@@ -81,6 +81,33 @@ pipeline {
                 }
             }
         }
+        stage('Go build windows') {
+            agent {
+                dockerfile {
+                    dir 'docker/go-docker'
+                    args '--volume /var/run/docker.sock:/var/run/docker.sock --user root:root'
+                }
+            }
+            steps {
+                script {
+                    // get owner UID of working directory to run commands as that user
+                    def dockerGroupId = sh(script: "stat -c '%g' /var/run/docker.sock", returnStdout: true).trim()
+                    def userId = sh(script: "stat -c '%u' .", returnStdout: true).trim()
+                    // set group id of docker group to that of the host so we may access /var/run/docker.sock
+                    sh "groupmod --gid ${dockerGroupId} docker"
+                    sh "useradd --create-home --gid ${dockerGroupId} --uid ${userId} jenkins"
+                    sh "newgrp docker"
+
+                    sh 'su jenkins -c "make build-windows"'
+                    stash(name: "build-windows", includes: "build/libuplink-amd64-windows_nt.dll")
+                }
+            }
+            post {
+                always {
+                    cleanWs()
+                }
+            }
+        }
         stage('Release') {
             agent {
                 dockerfile {
@@ -90,6 +117,7 @@ pipeline {
             steps {
                 unstash "build-x64"
                 unstash "build-arm64"
+                unstash "build-windows"
                 sh "make release.zip"
                 archiveArtifacts "release.zip"
             }
@@ -102,7 +130,7 @@ pipeline {
         stage('Composer') {
             agent {
                 docker {
-                    image 'composer:2.0.11'
+                    image 'composer:2.3.8'
                     args '--mount type=volume,source=composer-cache2,destination=/root/.composer/cache '
                 }
             }
