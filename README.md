@@ -39,34 +39,8 @@ ffi.enable=true
 
 ```
 composer config repositories.storj/uplink '{
-    "type": "package",
-    "package": {
-        "name": "storj/uplink",
-        "version": "1.3.0",
-        "license": "MIT/Expat",
-        "dist": {
-            "url": "https://link.storjshare.io/raw/jxmgbsqc4k2bbhuv27556pcoh7ra/uplink-php-releases/uplink-php-v1.3.0.zip",
-            "type": "zip"
-        },
-        "autoload": {
-            "psr-4": {
-                "Storj\\Uplink\\": "src/"
-            }
-        },
-        "autoload-dev": {
-            "psr-4": {
-                "Storj\\Uplink\\Test\\": "test/"
-            }
-        },
-        "require": {
-            "php": ">=7.4",
-            "ext-ffi": "*",
-            "psr/http-message": "^1.0"
-        },
-        "require-dev": {
-            "phpunit/phpunit": "^9.2"
-        }
-    }
+    "type": "composer",
+    "url": "https://raw.githubusercontent.com/storj-thirdparty/uplink-php/main/"
 }' &&
 composer require storj/uplink
 ```
