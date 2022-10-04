@@ -43,9 +43,12 @@ class SharePrefix
      * @param FFI $ffi
      * @param SharePrefix[] $sharePrefixes
      */
-    public static function toCStructArray(FFI $ffi, array $sharePrefixes, Scope $scope): FFI\CData
+    public static function toCStructArray(FFI $ffi, array $sharePrefixes, Scope $scope): ?FFI\CData
     {
         $count = count($sharePrefixes);
+        if ($count === 0) {
+            return null;
+        }
 
         $cSharePrefixesType = FFI::arrayType($ffi->type('UplinkSharePrefix'), [$count]);
         $cSharePrefixes = $ffi->new($cSharePrefixesType);

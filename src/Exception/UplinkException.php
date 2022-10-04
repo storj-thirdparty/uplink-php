@@ -24,6 +24,9 @@ abstract class UplinkException extends Exception
         0x20 => Object\InvalidObjectKey::class,
         0x21 => Object\ObjectNotFound::class,
         0x22 => Object\UploadDone::class,
+
+        0x30 => Edge\DialFailed::class,
+        0x31 => Edge\RegisterAccessFailed::class,
     ];
 
     /**
