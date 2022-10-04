@@ -53,6 +53,8 @@ build/uplink-php.h: tmp/uplink-c/.build/uplink/uplink.h tmp/uplink-c/.build/upli
 	sed -i 's/typedef __SIZE_TYPE__ GoUintptr;//g' build/uplink-php.h
 	sed -i 's/typedef float _Complex GoComplex64;//g' build/uplink-php.h
 	sed -i 's/typedef double _Complex GoComplex128;//g' build/uplink-php.h
+	sed -i 's/typedef _Fcomplex GoComplex64;//g' build/uplink-php.h
+	sed -i 's/typedef _Dcomplex GoComplex128;//g' build/uplink-php.h
 	sed -i 's/#ifdef __cplusplus//g' build/uplink-php.h
 	sed -i 's/extern "C" {//g' build/uplink-php.h
 	sed -i 's/#endif//g' build/uplink-php.h

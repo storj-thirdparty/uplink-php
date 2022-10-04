@@ -18,5 +18,5 @@ New release after uplink-c version bump
 - Change the uplink-c git tag in ./build.sh
 - Let [jenkins](https://build.dev.storj.io/blue/organizations/jenkins/uplink-php) build the artifact
 - Create a git tag
-- Upload the artifact to GitHub on the [releases page](https://github.com/storj-thirdparty/uplink-php/releases)
-- Update [README.md#installation](./README.md#installation) with the tag and artifact URL
+- Upload the artifact to GitHub on the [releases page](https://github.com/storj-thirdparty/uplink-php/releases) or to [Linksharing](https://link.storjshare.io/raw/jxmgbsqc4k2bbhuv27556pcoh7ra/uplink-php-releases/).
+- Update [packages.json](./packages.json) with the version tag and artifact URL
