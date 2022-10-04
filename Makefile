@@ -9,7 +9,7 @@ UID := $(shell id -u)
 
 tmp/uplink-c:
 	mkdir -p tmp
-	git clone --branch v1.5.0 https://github.com/storj/uplink-c.git ./tmp/uplink-c
+	git clone --branch v1.7.0 https://github.com/storj/uplink-c.git ./tmp/uplink-c
 
 .PHONY: clean
 clean:
