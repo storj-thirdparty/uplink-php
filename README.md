@@ -35,13 +35,10 @@ extension=ffi
 ffi.enable=true
 ```
 
-3. Install using composer. Copy and run:
+3. Add it as a requirement to your project's composer.json to install. Run:
 
 ```
-composer config repositories.storj/uplink '{
-    "type": "composer",
-    "url": "https://raw.githubusercontent.com/storj-thirdparty/uplink-php/main/"
-}' &&
+composer config repositories.storj/uplink composer https://raw.githubusercontent.com/storj-thirdparty/uplink-php/main/
 composer require storj/uplink
 ```
 
