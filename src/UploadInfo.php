@@ -6,8 +6,10 @@ use FFI;
 use FFI\CData;
 use Storj\Uplink\Internal\Util;
 
-class ObjectInfo
+class UploadInfo
 {
+    private string $uploadId;
+
     private string $key;
 
     /**
@@ -16,7 +18,7 @@ class ObjectInfo
     private bool $isPrefix;
 
     /**
-     * Null if @see ListObjectsOptions::$includeSystemMetadata was false
+     * Null if @see ListUploadOptions::$includeSystemMetadata was false
      */
     private ?SystemMetadata $systemMetadata;
 
@@ -28,7 +30,7 @@ class ObjectInfo
      * When choosing a custom key for your application start it with a prefix "app:key",
      * as an example application named "Image Board" might use a key "image-board:title".
      *
-     * Null if @see ListObjectsOptions::$includeCustomMetadata was false
+     * Null if @see ListUploadOptions::$includeCustomMetadata was false
      *
      * @var string[]|null
      */
@@ -38,17 +40,19 @@ class ObjectInfo
      * @param string[]|null $customMetaData
      */
     public function __construct(
+        string $uploadId,
         string $key,
         bool $isPrefix,
         ?SystemMetadata $systemMetadata,
         ?array $customMetaData
     ) {
+        $this->uploadId = $uploadId;
         $this->key = $key;
         $this->isPrefix = $isPrefix;
         $this->systemMetadata = $systemMetadata;
         $this->customMetaData = $customMetaData;
     }
-    
+
     /**
      * @internal
      */
@@ -68,11 +72,17 @@ class ObjectInfo
         }
 
         return new self(
+            FFI::string($cObjectInfo->upload_id),
             FFI::string($cObjectInfo->key),
             $cObjectInfo->is_prefix,
             $systemMetaData,
             $customMetaData
         );
+    }
+
+    public function getUploadId(): string
+    {
+        return $this->uploadId;
     }
 
     public function getKey(): string
@@ -85,9 +95,6 @@ class ObjectInfo
         return $this->isPrefix;
     }
 
-    /**
-     * @return SystemMetadata|null
-     */
     public function getSystemMetadata(): ?SystemMetadata
     {
         return $this->systemMetadata;

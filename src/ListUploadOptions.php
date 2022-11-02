@@ -8,12 +8,12 @@ use Storj\Uplink\Internal\Scope;
 use Storj\Uplink\Internal\Util;
 
 /**
- * Parameters to iterate over objects in a bucket
+ * Parameters to iterate over pending uploads in a bucket
  */
-class ListObjectsOptions
+class ListUploadOptions
 {
     /**
-     * Filter objects by a key prefix.
+     * Filter uploads by a key prefix.
      * If not empty, it must end with slash.
      */
     private string $prefix = '';
@@ -33,12 +33,12 @@ class ListObjectsOptions
     private bool $recursive = false;
 
     /**
-     * Include @see ObjectInfo::getSystemMetadata() in the results
+     * Include @see UploadInfo::getSystemMetadata() in the results
      */
     private bool $includeSystemMetadata = false;
 
     /**
-     * Include @see ObjectInfo::getCustomMetadata() in the results
+     * Include @see UploadInfo::getCustomMetadata() in the results
      */
     private bool $includeCustomMetadata = false;
 
@@ -92,7 +92,7 @@ class ListObjectsOptions
      */
     public function toCStruct(FFI $ffi, Scope $scope): CData
     {
-        $cListObjectsOptions = $ffi->new('UplinkListObjectsOptions');
+        $cListObjectsOptions = $ffi->new('UplinkListUploadsOptions');
 
         $cListObjectsOptions->prefix = Util::createCString($this->prefix, $scope);
         $cListObjectsOptions->cursor = Util::createCString($this->cursor, $scope);
