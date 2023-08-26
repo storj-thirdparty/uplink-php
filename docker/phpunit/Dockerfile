@@ -5,8 +5,8 @@ RUN apt-get update \
     && apt-get install -y libffi-dev postgresql git redis-server wget \
     && docker-php-ext-install ffi
 
-RUN wget https://golang.org/dl/go1.17.2.linux-amd64.tar.gz \
-    && tar -xvf go1.17.2.linux-amd64.tar.gz \
+RUN wget https://golang.org/dl/go1.21.0.linux-amd64.tar.gz \
+    && tar -xvf go1.21.0.linux-amd64.tar.gz \
     && mv go /usr/local
 
 ENV GOROOT=/usr/local/go
