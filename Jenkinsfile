@@ -33,7 +33,7 @@ pipeline {
         stage('Go build x64') {
             agent {
                 docker {
-                    image 'golang:1.18.3-buster'
+                    image 'golang:1.21.0-bullseye'
                     args "--volume /tmp/gomod:/go/pkg/mod --user root:root"
                 }
             }

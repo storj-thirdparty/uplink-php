@@ -26,7 +26,7 @@ build/libuplink-aarch64-linux.so: tmp/uplink-c
 		-v $(PWD)/tmp:$(PWD)/tmp \
 		--workdir $(PWD)/tmp/uplink-c \
 		-e CGO_ENABLED=1 \
-		docker.elastic.co/beats-dev/golang-crossbuild:1.18.3-arm \
+		docker.elastic.co/beats-dev/golang-crossbuild:1.20.7-arm \
 		--build-cmd "useradd --create-home --uid $(UID) jenkins && chown -R jenkins /go/pkg/mod && su jenkins -c 'PATH=\$$PATH:/go/bin:/usr/local/go/bin make build'" \
 		-p "linux/arm64"
 	mkdir -p build
@@ -38,7 +38,7 @@ build/libuplink-amd64-windows_nt.dll: tmp/uplink-c
 		-v $(PWD)/tmp:$(PWD)/tmp \
 		--workdir $(PWD)/tmp/uplink-c \
 		-e CGO_ENABLED=1 \
-		docker.elastic.co/beats-dev/golang-crossbuild:1.18.3-main-debian10 \
+		docker.elastic.co/beats-dev/golang-crossbuild:1.20.7-main-debian11 \
 		--build-cmd "useradd --create-home --uid $(UID) jenkins && chown -R jenkins /go/pkg/mod && su jenkins -c 'PATH=\$$PATH:/go/bin:/usr/local/go/bin make build'" \
 		-p "windows/amd64"
 	mkdir -p build
