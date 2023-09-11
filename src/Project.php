@@ -258,7 +258,6 @@ class Project
     public function listObjects(string $bucketName, ?ListObjectsOptions $listObjectsOptions = null): Generator
     {
         $scope = new Scope();
-        $pListObjectOptions = null;
 
         // ListObjectsOptions is technically optional to the C interface
         // but we need to know the options in order to parse the response
@@ -282,6 +281,39 @@ class Project
         }
 
         $pError = $this->ffi->uplink_object_iterator_err($pObjectIterator);
+        $scope->onExit(fn() => $this->ffi->uplink_free_error($pError));
+
+        Util::throwIfError($pError);
+    }
+
+    /**
+     * Iterate over objects which have started uploading but are not committed.
+     *
+     * @return Generator<UploadInfo>
+     */
+    public function listUploads(string $bucketName, ?ListUploadOptions $listUploadOptions = null): Generator
+    {
+        $scope = new Scope();
+
+        $listUploadOptions = $listUploadOptions ?? new ListUploadOptions();
+        $cListUploadOptions = $listUploadOptions->toCStruct($this->ffi, $scope);
+        $pListUploadOptions = FFI::addr($cListUploadOptions);
+
+        $pUploadIterator = $this->ffi->uplink_list_uploads($this->cProject, $bucketName, $pListUploadOptions);
+        $scope->onExit(fn() => $this->ffi->uplink_free_upload_iterator($pUploadIterator));
+
+        while($this->ffi->uplink_upload_iterator_next($pUploadIterator)) {
+            $pUploadInfo = $this->ffi->uplink_upload_iterator_item($pUploadIterator);
+            $innerScope = Scope::exit(fn() => $this->ffi->uplink_free_upload_info($pUploadInfo));
+
+            yield UploadInfo::fromCStruct(
+                $pUploadInfo[0],
+                $listUploadOptions->includeSystemMetadata(),
+                $listUploadOptions->includeCustomMetadata()
+            );
+        }
+
+        $pError = $this->ffi->uplink_upload_iterator_err($pUploadIterator);
         $scope->onExit(fn() => $this->ffi->uplink_free_error($pError));
 
         Util::throwIfError($pError);

@@ -124,4 +124,24 @@ class Util
             $i += 1;
         }
     }
+
+    /**
+     * @param CData $cCustomMetaData C struct of type UplinkCustomMetaData
+     * @return string[] hash map
+     */
+    public static function createCustomMetaDataFromCStruct(
+        CData $cCustomMetaData
+    ): array
+    {
+        $customMetaData = [];
+        foreach (Util::it($cCustomMetaData->count) as $i) {
+            $cEntry = $cCustomMetaData->entries[$i];
+            $key = FFI::string($cEntry->key, $cEntry->key_length);
+            $value = FFI::string($cEntry->value, $cEntry->value_length);
+
+            $customMetaData[$key] = $value;
+        }
+
+        return $customMetaData;
+    }
 }

@@ -4,7 +4,9 @@ namespace Storj\Uplink\Test;
 
 use RuntimeException;
 use Storj\Uplink\Access;
+use Storj\Uplink\Permission;
 use Storj\Uplink\Project;
+use Storj\Uplink\SharePrefix;
 use Storj\Uplink\Uplink;
 
 // Polyfill for PHP <8.0
@@ -48,10 +50,16 @@ class Util
     public static function access(bool $renew = false): Access
     {
         if (!self::$access || $renew) {
-            self::$access = self::uplink()->requestAccessWithPassphrase(
+            $access = self::uplink()->requestAccessWithPassphrase(
                 self::getSatelliteAddress(),
                 getenv('GATEWAY_0_API_KEY'),
                 'mypassphrase'
+            );
+            self::$access = $access->share(
+                Permission::fullPermission(),
+                new SharePrefix("phpunit"),
+                new SharePrefix("phpunit1"),
+                new SharePrefix("phpunit2"),
             );
         }
 
